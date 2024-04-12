@@ -46,96 +46,100 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: FutureProvider<List<Note>>(
-          initialData: [],
-          create: (context) => futureNotes,
-          child: Consumer<List<Note>>(
-            builder: (context, notes, child) {
-              if (notes.isNotEmpty) {
-                return SingleChildScrollView(
-                  child: StaggeredGrid.count(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 3,
-                    crossAxisSpacing: 3,
-                    children: [
-                      ...notes.map((note) {
-                        return GridTile(
-                          child: Card(
-                            child: InkWell(
-                              onTap: () {
-                                Navigator.of(context).push(
-                                  MaterialPageRoute(
-                                    builder: ((context) => ViewNoteScreen(
-                                          note: note,
-                                        )),
-                                  ),
-                                );
-                              },
-                              child: Container(
-                                padding: EdgeInsets.all(10),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      width: double.maxFinite,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            note.title,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Text(
-                                            DateFormat.yMMMMd('en_US')
-                                                .format(
-                                                    note.updatedAt as DateTime)
-                                                .toString(),
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 10,
+        child: RefreshIndicator(
+          onRefresh: () {},
+          child: FutureProvider<List<Note>>(
+            initialData: [],
+            create: (context) => futureNotes,
+            child: Consumer<List<Note>>(
+              builder: (context, notes, child) {
+                if (notes.isNotEmpty) {
+                  return SingleChildScrollView(
+                    child: StaggeredGrid.count(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 3,
+                      crossAxisSpacing: 3,
+                      children: [
+                        ...notes.map((note) {
+                          return GridTile(
+                            child: Card(
+                              child: InkWell(
+                                onLongPress: () {},
+                                onTap: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: ((context) => ViewNoteScreen(
+                                            note: note,
+                                          )),
+                                    ),
+                                  );
+                                },
+                                child: Container(
+                                  padding: EdgeInsets.all(10),
+                                  child: Column(
+                                    children: [
+                                      SizedBox(
+                                        width: double.maxFinite,
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              note.title,
+                                              style: const TextStyle(
+                                                  fontWeight: FontWeight.bold),
                                             ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    SizedBox(
-                                      width: double.maxFinite,
-                                      child: Text(
-                                        note.description,
-                                        maxLines: 7,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontStyle: FontStyle.italic,
-                                          color:
-                                              Color.fromARGB(255, 71, 70, 70),
+                                            Text(
+                                              DateFormat.yMMMMd('en_US')
+                                                  .format(note.updatedAt
+                                                      as DateTime)
+                                                  .toString(),
+                                              style: const TextStyle(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w300,
+                                                fontSize: 10,
+                                              ),
+                                            ),
+                                          ],
                                         ),
                                       ),
-                                    ),
-                                  ],
+                                      const SizedBox(
+                                        height: 10,
+                                      ),
+                                      SizedBox(
+                                        width: double.maxFinite,
+                                        child: Text(
+                                          note.description,
+                                          maxLines: 7,
+                                          style: const TextStyle(
+                                            fontSize: 12,
+                                            fontStyle: FontStyle.italic,
+                                            color:
+                                                Color.fromARGB(255, 71, 70, 70),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                             ),
-                          ),
-                        );
-                      }),
-                    ],
+                          );
+                        }),
+                      ],
+                    ),
+                  );
+                }
+                return const Center(
+                  child: Text(
+                    'No notes',
+                    style: TextStyle(
+                      fontSize: 24,
+                    ),
                   ),
                 );
-              }
-              return const Center(
-                child: Text(
-                  'No notes',
-                  style: TextStyle(
-                    fontSize: 24,
-                  ),
-                ),
-              );
-            },
+              },
+            ),
           ),
         ),
       ),

@@ -39,7 +39,7 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
               onPressed: () {
                 var description = formController.text;
                 var title = description.split('\n');
-                var note = Note(
+                Note note = Note(
                   title: title[0],
                   description: description,
                   createdAt: DateTime.now(),
@@ -53,6 +53,19 @@ class _AddNoteScreenState extends State<AddNoteScreen> {
                 //   context,
                 //   MaterialPageRoute(builder: (context) => const MainScreen()),
                 // ).then((value) => setState(() {}));
+
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: const Text('Note saved successfully'),
+                    action: SnackBarAction(
+                      label: 'Undo',
+                      onPressed: () {
+                        Provider.of<NotesController>(context, listen: false)
+                            .undoSave();
+                      },
+                    ),
+                  ),
+                );
 
                 Provider.of<NotesController>(context, listen: false)
                     .goToMain(context);

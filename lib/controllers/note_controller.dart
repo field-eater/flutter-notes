@@ -84,4 +84,14 @@ class NotesController extends ChangeNotifier {
     );
     notifyListeners();
   }
+
+  Future<void> undoSave() async {
+    final db = await database();
+
+    await db.delete(
+      'notes',
+      where: 'id = (SELECT MAX(id) FROM notes)',
+    );
+    notifyListeners();
+  }
 }
