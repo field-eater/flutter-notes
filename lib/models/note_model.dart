@@ -1,22 +1,24 @@
 class Note {
-  final int id;
+  final int? id;
   final String title;
   final String description;
-  final DateTime date;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
 
   const Note({
-    required this.id,
+    this.id,
     required this.title,
     required this.description,
-    required this.date,
+    this.createdAt,
+    this.updatedAt,
   });
 
   Map<String, Object?> toMap() {
     return {
-      'id': id,
       'title': title,
       'description': description,
-      'date': date,
+      'created_at': createdAt.toString(),
+      'updated_at': updatedAt.toString(),
     };
   }
 }
