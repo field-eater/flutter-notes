@@ -157,9 +157,9 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                                   .deleteNote(widget.note.id as int);
 
                               ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
+                                const SnackBar(
                                   duration: Duration(seconds: 2),
-                                  content: const Row(
+                                  content: Row(
                                     children: [
                                       Icon(
                                         Icons.delete,
@@ -170,14 +170,6 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                                       ),
                                       Text('Note deleted successfully'),
                                     ],
-                                  ),
-                                  action: SnackBarAction(
-                                    label: 'Undo',
-                                    onPressed: () {
-                                      Provider.of<NotesController>(context,
-                                              listen: false)
-                                          .insertNote(widget.note);
-                                    },
                                   ),
                                 ),
                               );

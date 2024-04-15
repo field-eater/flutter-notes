@@ -161,13 +161,24 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                                   });
                                 },
                                 onTap: () {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: ((context) => ViewNoteScreen(
-                                            note: note,
-                                          )),
-                                    ),
-                                  );
+                                  if (selectedNotes.isEmpty) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: ((context) => ViewNoteScreen(
+                                              note: note,
+                                            )),
+                                      ),
+                                    );
+                                  } else {
+                                    setState(() {
+                                      if (selectedNotes
+                                          .contains(note.id as int)) {
+                                        selectedNotes.remove(note.id as int);
+                                      } else {
+                                        selectedNotes.add(note.id as int);
+                                      }
+                                    });
+                                  }
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.all(10),
@@ -238,16 +249,18 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           },
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Navigator.of(context).push(
-            MaterialPageRoute(
-              builder: (context) => CreateNoteScreen(),
-            ),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
+      floatingActionButton: (selectedNotes.isEmpty)
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (context) => CreateNoteScreen(),
+                  ),
+                );
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
     );
   }
 }

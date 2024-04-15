@@ -86,12 +86,6 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: const Text('Note saved successfully'),
-                      action: SnackBarAction(
-                        label: 'Undo',
-                        onPressed: () {
-                          notesController.undoSave();
-                        },
-                      ),
                     ),
                   );
                   notesController.goToMain(context);
