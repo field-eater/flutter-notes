@@ -17,6 +17,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   late Stream<List<Note>> streamNotes;
+  late List<int> selectedNotes;
+  final FocusNode _focusNode = FocusNode();
 
   late TextEditingController controller;
 
@@ -28,9 +30,18 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     _init();
   }
 
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
   _init() {
+    selectedNotes =
+        Provider.of<NotesController>(context, listen: false).selectedNotes;
     streamNotes =
         Provider.of<NotesController>(context, listen: false).getNotes();
+
     // streamedNotes = Provider.of<NotesController>(context, listen: false)
     //     .streamFromFutures(futureNotes);
     controller = context.read<NotesController>().formController;
@@ -41,8 +52,75 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text(
-          'Notes',
+        actions: selectedNotes.length > 0
+            ? [
+                IconButton(
+                    onPressed: () {
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: BeveledRectangleBorder(),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("No"),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Provider.of<NotesController>(context,
+                                            listen: false)
+                                        .deleteNotes(selectedNotes);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        duration: Duration(seconds: 2),
+                                        content: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.delete,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text('Notes deleted successfully'),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                    setState(() {
+                                      selectedNotes = [];
+                                    });
+                                    Navigator.of(context).pop();
+                                  },
+                                  child: Text("Yes"),
+                                )
+                              ],
+                              content: Text(
+                                  'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
+                            );
+                          });
+                    },
+                    icon: Icon(Icons.delete))
+              ]
+            : [],
+        leading: selectedNotes.length > 0
+            ? IconButton(
+                icon: Icon(Icons.close),
+                onPressed: () {
+                  setState(() {
+                    selectedNotes = [];
+                  });
+                },
+              )
+            : null,
+        title: Text(
+          selectedNotes.length < 1
+              ? 'Notes'
+              : "${selectedNotes.length} items selected",
           style: TextStyle(color: Colors.white),
         ),
         // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.menu))],
@@ -54,9 +132,9 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           initialData: [],
           create: (context) => streamNotes,
           builder: (context, child) {
+            print(selectedNotes.length);
             return Consumer<List<Note>>(
               builder: (context, notes, child) {
-                print(notes.length);
                 if (notes.isNotEmpty) {
                   return SingleChildScrollView(
                     child: StaggeredGrid.count(
@@ -67,8 +145,21 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                         ...notes.map((note) {
                           return GridTile(
                             child: Card(
+                              color: (selectedNotes.contains(note.id))
+                                  ? const Color.fromARGB(255, 167, 145, 229)
+                                  : null,
                               child: InkWell(
-                                onLongPress: () {},
+                                focusNode: _focusNode,
+                                onLongPress: () {
+                                  setState(() {
+                                    if (selectedNotes
+                                        .contains(note.id as int)) {
+                                      selectedNotes.remove(note.id as int);
+                                    } else {
+                                      selectedNotes.add(note.id as int);
+                                    }
+                                  });
+                                },
                                 onTap: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
@@ -79,7 +170,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
                                   );
                                 },
                                 child: Container(
-                                  padding: EdgeInsets.all(10),
+                                  padding: const EdgeInsets.all(10),
                                   child: Column(
                                     children: [
                                       SizedBox(

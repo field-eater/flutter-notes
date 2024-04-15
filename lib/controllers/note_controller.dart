@@ -9,6 +9,13 @@ class NotesController extends ChangeNotifier {
   TextEditingController formController = TextEditingController();
   StreamController noteStreamController = StreamController();
 
+  List<int> selectedNotes = [];
+
+  void selectNote(int id) {
+    selectedNotes.add(id);
+    notifyListeners();
+  }
+
   Future<void> insertNote(Note note) async {
     // Get a reference to the database.
     final db = await database();
@@ -128,6 +135,18 @@ class NotesController extends ChangeNotifier {
       where: 'id = ?',
       whereArgs: [id],
     );
+    notifyListeners();
+  }
+
+  Future<void> deleteNotes(List<int> ids) async {
+    final db = await database();
+    for (int id in ids) {
+      await db.delete(
+        'notes',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+    }
     notifyListeners();
   }
 
