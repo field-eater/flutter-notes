@@ -1,11 +1,10 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
 import 'package:notes_app/controllers/note_controller.dart';
 import 'package:notes_app/models/note_model.dart';
-import 'package:notes_app/screens/add_note_screen.dart';
+import 'package:notes_app/screens/create_note_screen.dart';
 import 'package:notes_app/screens/view_note_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -16,20 +15,24 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> {
-  late Future<List<Note>> futureNotes;
+class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+  late Stream<List<Note>> streamNotes;
+
   late TextEditingController controller;
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _init();
   }
 
   _init() {
-    futureNotes =
+    streamNotes =
         Provider.of<NotesController>(context, listen: false).getNotes();
+    // streamedNotes = Provider.of<NotesController>(context, listen: false)
+    //     .streamFromFutures(futureNotes);
     controller = context.read<NotesController>().formController;
   }
 
@@ -46,13 +49,14 @@ class _MainScreenState extends State<MainScreen> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: RefreshIndicator(
-          onRefresh: () {},
-          child: FutureProvider<List<Note>>(
-            initialData: [],
-            create: (context) => futureNotes,
-            child: Consumer<List<Note>>(
+        child: StreamProvider<List<Note>>(
+          updateShouldNotify: (previous, current) => (current != previous),
+          initialData: [],
+          create: (context) => streamNotes,
+          builder: (context, child) {
+            return Consumer<List<Note>>(
               builder: (context, notes, child) {
+                print(notes.length);
                 if (notes.isNotEmpty) {
                   return SingleChildScrollView(
                     child: StaggeredGrid.count(
@@ -139,15 +143,15 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                 );
               },
-            ),
-          ),
+            );
+          },
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
-              builder: (context) => AddNoteScreen(),
+              builder: (context) => CreateNoteScreen(),
             ),
           );
         },

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
-import 'package:intl/intl.dart';
+
 import 'package:notes_app/controllers/note_controller.dart';
 import 'package:notes_app/models/note_model.dart';
-import 'package:notes_app/screens/main_screen.dart';
+
 import 'package:notes_app/widgets/note_textfield.dart';
 import 'package:provider/provider.dart';
 
@@ -18,7 +18,11 @@ class ViewNoteScreen extends StatefulWidget {
 
 class _ViewNoteScreenState extends State<ViewNoteScreen> {
   TextEditingController formController = TextEditingController();
+  final UndoHistoryController undoController = UndoHistoryController();
 
+  late Future<Note> prevNote;
+
+  @override
   void dispose() {
     // TODO: implement dispose
     formController.dispose();
@@ -27,13 +31,45 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    var notesController = Provider.of<NotesController>(context);
     return Scaffold(
       appBar: AppBar(
         title: Text(
           widget.note.title,
-          style: TextStyle(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         actions: [
+          ValueListenableBuilder(
+            valueListenable: undoController,
+            builder: (context, value, child) {
+              return Row(
+                children: [
+                  IconButton(
+                    icon: Icon(Icons.undo),
+                    style: (value.canUndo)
+                        ? IconButton.styleFrom(foregroundColor: Colors.white)
+                        : IconButton.styleFrom(foregroundColor: Colors.grey),
+                    onPressed: () {
+                      if (value.canUndo) {
+                        undoController.undo();
+                      }
+                    },
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.redo),
+                    style: (value.canRedo)
+                        ? IconButton.styleFrom(foregroundColor: Colors.white)
+                        : IconButton.styleFrom(foregroundColor: Colors.grey),
+                    onPressed: () {
+                      if (value.canRedo) {
+                        undoController.redo();
+                      }
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
           PopupMenuButton(itemBuilder: (context) {
             return [
               PopupMenuItem(
@@ -51,7 +87,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                   var description = formController.text;
                   var title = description.split('\n');
 
-                  var note = Note(
+                  var newNote = Note(
                     id: widget.note.id,
                     title: title[0],
                     description: description,
@@ -59,11 +95,35 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                     updatedAt: DateTime.now(),
                   );
 
-                  Provider.of<NotesController>(context, listen: false)
-                      .updateNote(note);
+                  if (description != widget.note.description) {
+                    notesController.updateNote(newNote);
 
-                  Provider.of<NotesController>(context, listen: false)
-                      .goToMain(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Note updated successfully'),
+                      ),
+                    );
+
+                    notesController.goToMain(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        duration: Duration(seconds: 2),
+                        content: Row(
+                          children: [
+                            Icon(
+                              Icons.info,
+                              color: Colors.white,
+                            ),
+                            SizedBox(
+                              width: 10,
+                            ),
+                            Text('No new changes were made'),
+                          ],
+                        ),
+                      ),
+                    );
+                  }
                 },
               ),
               PopupMenuItem(
@@ -96,14 +156,35 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                                       listen: false)
                                   .deleteNote(widget.note.id as int);
 
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  duration: Duration(seconds: 2),
+                                  content: const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.delete,
+                                        color: Colors.white,
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                      Text('Note deleted successfully'),
+                                    ],
+                                  ),
+                                  action: SnackBarAction(
+                                    label: 'Undo',
+                                    onPressed: () {
+                                      Provider.of<NotesController>(context,
+                                              listen: false)
+                                          .insertNote(widget.note);
+                                    },
+                                  ),
+                                ),
+                              );
+
                               Provider.of<NotesController>(context,
                                       listen: false)
                                   .goToMain(context);
-                              // Navigator.push(
-                              //   context,
-                              //   MaterialPageRoute(
-                              //       builder: (context) => const MainScreen()),
-                              // ).then((value) => setState(() {}));
                             },
                             child: Text('Yes'),
                           ),
@@ -120,74 +201,11 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
         ],
       ),
       body: NoteTextfield(
+        undoController: undoController,
         note: widget.note,
         controller: formController,
+        route: 'view_note',
       ),
     );
   }
 }
-
-// IconButton(
-//               onPressed: () {
-//                 showDialog(
-//                   context: context,
-//                   builder: (context) {
-//                     return AlertDialog(
-//                       shape: BeveledRectangleBorder(),
-//                       actions: [
-//                         TextButton(
-//                           onPressed: () {
-//                             Navigator.of(context).pop();
-//                           },
-//                           child: Text('No'),
-//                         ),
-//                         TextButton(
-//                           onPressed: () {
-//                             Provider.of<NotesController>(context, listen: false)
-//                                 .deleteNote(widget.note.id as int);
-
-//                             Provider.of<NotesController>(context, listen: false)
-//                                 .goToMain(context);
-//                             // Navigator.push(
-//                             //   context,
-//                             //   MaterialPageRoute(
-//                             //       builder: (context) => const MainScreen()),
-//                             // ).then((value) => setState(() {}));
-//                           },
-//                           child: Text('Yes'),
-//                         ),
-//                       ],
-//                       content: const Text(
-//                           'Are you sure you want to delete this note?'),
-//                     );
-//                   },
-//                 );
-//               },
-//               icon: const Icon(Icons.delete)),
-//           IconButton(
-//             onPressed: () {
-//               var description = formController.text;
-//               var title = description.split('\n');
-
-//               var note = Note(
-//                 id: widget.note.id,
-//                 title: title[0],
-//                 description: description,
-//                 createdAt: widget.note.createdAt,
-//                 updatedAt: DateTime.now(),
-//               );
-
-//               Provider.of<NotesController>(context, listen: false)
-//                   .updateNote(note);
-
-//               Provider.of<NotesController>(context, listen: false)
-//                   .goToMain(context);
-
-//               // Navigator.push(
-//               //   context,
-//               //   MaterialPageRoute(builder: (context) => const MainScreen()),
-//               // ).then((value) => setState(() {}));
-//             },
-//             icon: const Icon(Icons.save),
-//             color: Colors.white,
-//           ),

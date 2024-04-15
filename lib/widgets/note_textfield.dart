@@ -3,10 +3,18 @@ import 'package:intl/intl.dart';
 import 'package:notes_app/models/note_model.dart';
 
 class NoteTextfield extends StatefulWidget {
-  const NoteTextfield({super.key, this.note, required this.controller});
+  const NoteTextfield({
+    super.key,
+    this.note,
+    required this.controller,
+    required this.route,
+    required this.undoController,
+  });
 
   final Note? note;
   final TextEditingController controller;
+  final UndoHistoryController undoController;
+  final String route;
 
   @override
   _NoteTextfieldState createState() => _NoteTextfieldState();
@@ -15,7 +23,10 @@ class NoteTextfield extends StatefulWidget {
 class _NoteTextfieldState extends State<NoteTextfield> {
   late int _counterText = 0;
   var date = DateFormat.yMMMMd('en_US').format(DateTime.now()).toString();
+
   var updatedAt = '';
+
+// to open keyboard call this function;
 
   @override
   void initState() {
@@ -46,6 +57,8 @@ class _NoteTextfieldState extends State<NoteTextfield> {
             ),
             TextField(
               controller: widget.controller,
+              undoController: widget.undoController,
+              autofocus: (widget.route == 'create_note') ? true : false,
               onChanged: (value) {
                 setState(() {
                   _counterText = value.length;
