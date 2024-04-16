@@ -8,6 +8,8 @@ import 'package:sqflite/sqflite.dart';
 class NotesController extends ChangeNotifier {
   TextEditingController formController = TextEditingController();
   StreamController noteStreamController = StreamController();
+  final List<Note> _notes = [];
+  List<Note> get notes => _notes;
 
   List<int> selectedNotes = [];
 
@@ -62,35 +64,33 @@ class NotesController extends ChangeNotifier {
   }
 
   // A method that retrieves all the Notes from the Notes table.
-  Stream<List<Note>> getNotes() async* {
+  Future<List<Note>> getNotes() async {
     // Get a reference to the database.
     final db = await database();
 
     // Query the table for all the Notes.
     final List<Map<String, Object?>> noteMaps = await db.query('Notes');
 
-    final List<Note> notes = [];
-
-    for (final {
-          'id': id as int,
-          'title': title as String,
-          'description': description as String,
-          'created_at': createdAt as String,
-          'updated_at': updatedAt as String,
-        } in noteMaps) {
-      var note = Note(
-        id: id,
-        title: title,
-        description: description,
-        createdAt: DateTime.parse(createdAt),
-        updatedAt: DateTime.parse(updatedAt),
-      );
-      notes.add(note);
-    }
+    return [
+      for (final {
+            'id': id as int,
+            'title': title as String,
+            'description': description as String,
+            'created_at': createdAt as String,
+            'updated_at': updatedAt as String,
+          } in noteMaps)
+        Note(
+          id: id,
+          title: title,
+          description: description,
+          createdAt: DateTime.parse(createdAt),
+          updatedAt: DateTime.parse(updatedAt),
+        ),
+    ];
 
     notifyListeners();
 
-    yield notes;
+    notes;
   }
 
   // Stream<List<Note>> streamFromFutures<T>(
@@ -118,6 +118,7 @@ class NotesController extends ChangeNotifier {
   }
 
   void goToMain(BuildContext context) {
+    selectedNotes = [];
     Navigator.push(
       context,
       MaterialPageRoute(

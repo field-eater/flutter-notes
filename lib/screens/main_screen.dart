@@ -15,8 +15,8 @@ class MainScreen extends StatefulWidget {
   _MainScreenState createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
-  late Stream<List<Note>> streamNotes;
+class _MainScreenState extends State<MainScreen> {
+  late Future<List<Note>> streamNotes;
   late List<int> selectedNotes;
   final FocusNode _focusNode = FocusNode();
 
@@ -26,7 +26,7 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   void initState() {
     // TODO: implement initState
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
+
     _init();
   }
 
@@ -52,87 +52,17 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        actions: selectedNotes.length > 0
-            ? [
-                IconButton(
-                    onPressed: () {
-                      showDialog(
-                          context: context,
-                          builder: (context) {
-                            return AlertDialog(
-                              shape: BeveledRectangleBorder(),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text("No"),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Provider.of<NotesController>(context,
-                                            listen: false)
-                                        .deleteNotes(selectedNotes);
-
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        duration: Duration(seconds: 2),
-                                        content: Row(
-                                          children: [
-                                            Icon(
-                                              Icons.delete,
-                                              color: Colors.white,
-                                            ),
-                                            SizedBox(
-                                              width: 10,
-                                            ),
-                                            Text('Notes deleted successfully'),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                    setState(() {
-                                      selectedNotes = [];
-                                    });
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: Text("Yes"),
-                                )
-                              ],
-                              content: Text(
-                                  'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
-                            );
-                          });
-                    },
-                    icon: Icon(Icons.delete))
-              ]
-            : [],
-        leading: selectedNotes.length > 0
-            ? IconButton(
-                icon: Icon(Icons.close),
-                onPressed: () {
-                  setState(() {
-                    selectedNotes = [];
-                  });
-                },
-              )
-            : null,
-        title: Text(
-          selectedNotes.length < 1
-              ? 'Notes'
-              : "${selectedNotes.length} items selected",
-          style: TextStyle(color: Colors.white),
-        ),
+        actions: scaffoldActions(),
+        leading: scaffoldLeading(),
+        title: scaffoldTitle(),
         // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.menu))],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: StreamProvider<List<Note>>(
-          updateShouldNotify: (previous, current) => (current != previous),
+        child: FutureProvider<List<Note>>(
           initialData: [],
           create: (context) => streamNotes,
           builder: (context, child) {
-            print(selectedNotes.length);
             return Consumer<List<Note>>(
               builder: (context, notes, child) {
                 if (notes.isNotEmpty) {
@@ -249,18 +179,107 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           },
         ),
       ),
-      floatingActionButton: (selectedNotes.isEmpty)
-          ? FloatingActionButton(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => CreateNoteScreen(),
-                  ),
-                );
-              },
-              child: const Icon(Icons.add),
-            )
-          : null,
+      floatingActionButton: scaffoldFloatingActionButton(),
     );
+  }
+
+  Widget? scaffoldFloatingActionButton() {
+    if (selectedNotes.isEmpty) {
+      return FloatingActionButton(
+        onPressed: () {
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => CreateNoteScreen(),
+            ),
+          );
+        },
+        child: const Icon(Icons.add),
+      );
+    }
+    return null;
+  }
+
+  Widget? scaffoldTitle() {
+    return Text(
+      selectedNotes.length < 1
+          ? 'Notes'
+          : "${selectedNotes.length} items selected",
+      style: TextStyle(color: Colors.white),
+    );
+  }
+
+  Widget? scaffoldLeading() {
+    if (selectedNotes.length > 0) {
+      return IconButton(
+        icon: Icon(Icons.close),
+        onPressed: () {
+          setState(() {
+            selectedNotes = [];
+          });
+        },
+      );
+    }
+    return null;
+  }
+
+  List<Widget>? scaffoldActions() {
+    if (selectedNotes.isNotEmpty) {
+      return [
+        IconButton(
+            onPressed: () {
+              showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      shape: BeveledRectangleBorder(),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            setState(() {
+                              selectedNotes = [];
+                            });
+                          },
+                          child: Text("No"),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Provider.of<NotesController>(context, listen: false)
+                                .deleteNotes(selectedNotes);
+
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                duration: Duration(seconds: 2),
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text('Notes deleted successfully'),
+                                  ],
+                                ),
+                              ),
+                            );
+                            setState(() {
+                              selectedNotes = [];
+                            });
+                            Navigator.of(context).pop();
+                          },
+                          child: Text("Yes"),
+                        )
+                      ],
+                      content: Text(
+                          'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
+                    );
+                  });
+            },
+            icon: Icon(Icons.delete))
+      ];
+    }
+    return null;
   }
 }
