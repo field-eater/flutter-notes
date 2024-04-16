@@ -16,7 +16,7 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late Future<List<Note>> streamNotes;
+  late Future<List<Note>> futureNotes;
   late List<int> selectedNotes;
   final FocusNode _focusNode = FocusNode();
 
@@ -26,7 +26,6 @@ class _MainScreenState extends State<MainScreen> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
     _init();
   }
 
@@ -39,7 +38,7 @@ class _MainScreenState extends State<MainScreen> {
   _init() {
     selectedNotes =
         Provider.of<NotesController>(context, listen: false).selectedNotes;
-    streamNotes =
+    futureNotes =
         Provider.of<NotesController>(context, listen: false).getNotes();
 
     // streamedNotes = Provider.of<NotesController>(context, listen: false)
@@ -61,122 +60,119 @@ class _MainScreenState extends State<MainScreen> {
         padding: const EdgeInsets.all(12),
         child: FutureProvider<List<Note>>(
           initialData: [],
-          create: (context) => streamNotes,
-          builder: (context, child) {
-            return Consumer<List<Note>>(
-              builder: (context, notes, child) {
-                if (notes.isNotEmpty) {
-                  return SingleChildScrollView(
-                    child: StaggeredGrid.count(
+          create: (context) => futureNotes,
+          child: Consumer<List<Note>>(
+            builder: (context, notes, child) {
+              if (notes.isNotEmpty) {
+                return SingleChildScrollView(
+                  child: StaggeredGrid.count(
                       crossAxisCount: 2,
                       mainAxisSpacing: 3,
                       crossAxisSpacing: 3,
-                      children: [
-                        ...notes.map((note) {
-                          return GridTile(
-                            child: Card(
-                              color: (selectedNotes.contains(note.id))
-                                  ? const Color.fromARGB(255, 167, 145, 229)
-                                  : null,
-                              child: InkWell(
-                                focusNode: _focusNode,
-                                onLongPress: () {
+                      children: List.generate(notes.length, (index) {
+                        return GridTile(
+                          child: Card(
+                            color: (selectedNotes.contains(notes[index].id))
+                                ? const Color.fromARGB(255, 167, 145, 229)
+                                : null,
+                            child: InkWell(
+                              focusNode: _focusNode,
+                              onLongPress: () {
+                                setState(() {
+                                  if (selectedNotes
+                                      .contains(notes[index].id as int)) {
+                                    selectedNotes
+                                        .remove(notes[index].id as int);
+                                  } else {
+                                    selectedNotes.add(notes[index].id as int);
+                                  }
+                                });
+                              },
+                              onTap: () {
+                                if (selectedNotes.isEmpty) {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: ((context) => ViewNoteScreen(
+                                            note: notes[index],
+                                          )),
+                                    ),
+                                  );
+                                } else {
                                   setState(() {
                                     if (selectedNotes
-                                        .contains(note.id as int)) {
-                                      selectedNotes.remove(note.id as int);
+                                        .contains(notes[index].id as int)) {
+                                      selectedNotes
+                                          .remove(notes[index].id as int);
                                     } else {
-                                      selectedNotes.add(note.id as int);
+                                      selectedNotes.add(notes[index].id as int);
                                     }
                                   });
-                                },
-                                onTap: () {
-                                  if (selectedNotes.isEmpty) {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: ((context) => ViewNoteScreen(
-                                              note: note,
-                                            )),
-                                      ),
-                                    );
-                                  } else {
-                                    setState(() {
-                                      if (selectedNotes
-                                          .contains(note.id as int)) {
-                                        selectedNotes.remove(note.id as int);
-                                      } else {
-                                        selectedNotes.add(note.id as int);
-                                      }
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.all(10),
-                                  child: Column(
-                                    children: [
-                                      SizedBox(
-                                        width: double.maxFinite,
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              note.title,
-                                              style: const TextStyle(
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(
-                                              DateFormat.yMMMMd('en_US')
-                                                  .format(note.updatedAt
-                                                      as DateTime)
-                                                  .toString(),
-                                              style: const TextStyle(
-                                                color: Colors.black,
-                                                fontWeight: FontWeight.w300,
-                                                fontSize: 10,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      SizedBox(
-                                        width: double.maxFinite,
-                                        child: Text(
-                                          note.description,
-                                          maxLines: 7,
-                                          style: const TextStyle(
-                                            fontSize: 12,
-                                            fontStyle: FontStyle.italic,
-                                            color:
-                                                Color.fromARGB(255, 71, 70, 70),
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.all(10),
+                                child: Column(
+                                  children: [
+                                    SizedBox(
+                                      width: double.maxFinite,
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            notes[index].title,
+                                            style: const TextStyle(
+                                                fontWeight: FontWeight.bold),
                                           ),
+                                          Text(
+                                            DateFormat.yMMMMd('en_US')
+                                                .format(notes[index].updatedAt
+                                                    as DateTime)
+                                                .toString(),
+                                            style: const TextStyle(
+                                              color: Colors.black,
+                                              fontWeight: FontWeight.w300,
+                                              fontSize: 10,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(
+                                      height: 10,
+                                    ),
+                                    SizedBox(
+                                      width: double.maxFinite,
+                                      child: Text(
+                                        notes[index].description,
+                                        maxLines: 7,
+                                        style: const TextStyle(
+                                          fontSize: 12,
+                                          fontStyle: FontStyle.italic,
+                                          color:
+                                              Color.fromARGB(255, 71, 70, 70),
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                    ),
+                                  ],
                                 ),
                               ),
                             ),
-                          );
-                        }),
-                      ],
-                    ),
-                  );
-                }
-                return const Center(
-                  child: Text(
-                    'No notes',
-                    style: TextStyle(
-                      fontSize: 24,
-                    ),
-                  ),
+                          ),
+                        );
+                      })),
                 );
-              },
-            );
-          },
+              }
+              return const Center(
+                child: Text(
+                  'No notes',
+                  style: TextStyle(
+                    fontSize: 24,
+                  ),
+                ),
+              );
+            },
+          ),
         ),
       ),
       floatingActionButton: scaffoldFloatingActionButton(),
