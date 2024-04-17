@@ -107,6 +107,7 @@ class NotesController extends ChangeNotifier {
 
   void goToMain(BuildContext context) {
     _selectedNotes = [];
+    ;
     Navigator.push(
       context,
       MaterialPageRoute(

@@ -88,6 +88,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                       content: const Text('Note saved successfully'),
                     ),
                   );
+
                   notesController.goToMain(context);
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
