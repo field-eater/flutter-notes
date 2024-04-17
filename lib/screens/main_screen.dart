@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
@@ -21,6 +24,7 @@ class _MainScreenState extends State<MainScreen> {
   List<Note> notes = [];
   late List<int> selectedNotes;
   bool hasSelect = false;
+  bool isFetching = true;
 
   late TextEditingController controller;
 
@@ -56,6 +60,7 @@ class _MainScreenState extends State<MainScreen> {
         if (notes.isEmpty) {
           hasSelect = false;
         }
+        isFetching = false;
       });
     });
   }
@@ -78,36 +83,101 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget? gridNotes() {
-    if (notes.isNotEmpty) {
-      return SingleChildScrollView(
-        child: StaggeredGrid.count(
+    if (isFetching) {
+      return Skeletonizer(
+        child: GridView.count(
           crossAxisCount: 2,
           children: List.generate(notes.length, (index) {
             return Card(
-              color: (selectedNotes.contains(notes[index].id))
-                  ? const Color.fromARGB(255, 167, 145, 229)
-                  : null,
-              child: InkWell(
-                onLongPress: () {
-                  setState(() {
-                    hasSelect = true;
-                    if (selectedNotes.contains(notes[index].id as int)) {
-                      selectedNotes.remove(notes[index].id as int);
-                    } else {
-                      selectedNotes.add(notes[index].id as int);
-                    }
-                  });
-                },
-                onTap: () {
-                  if (selectedNotes.isEmpty) {
-                    if (!hasSelect) {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: ((context) => ViewNoteScreen(
-                                note: notes[index],
-                              )),
+              child: Container(
+                padding: const EdgeInsets.all(10),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Placeholder',
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            DateFormat.MMMd('en_US')
+                                .add_jm()
+                                .format(notes[index].updatedAt as DateTime)
+                                .toString(),
+                            style: const TextStyle(
+                              color: Colors.black,
+                              fontWeight: FontWeight.w300,
+                              fontSize: 10,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    SizedBox(
+                      width: double.maxFinite,
+                      child: Text(
+                        'Placeholder',
+                        maxLines: 7,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: Color.fromARGB(255, 71, 70, 70),
                         ),
-                      );
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    } else {
+      if (notes.isNotEmpty) {
+        return SingleChildScrollView(
+          child: StaggeredGrid.count(
+            crossAxisCount: 2,
+            children: List.generate(notes.length, (index) {
+              return Card(
+                color: (selectedNotes.contains(notes[index].id))
+                    ? const Color.fromARGB(255, 167, 145, 229)
+                    : null,
+                child: InkWell(
+                  onLongPress: () {
+                    setState(() {
+                      hasSelect = true;
+                      if (selectedNotes.contains(notes[index].id as int)) {
+                        selectedNotes.remove(notes[index].id as int);
+                      } else {
+                        selectedNotes.add(notes[index].id as int);
+                      }
+                    });
+                  },
+                  onTap: () {
+                    if (selectedNotes.isEmpty) {
+                      if (!hasSelect) {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: ((context) => ViewNoteScreen(
+                                  note: notes[index],
+                                )),
+                          ),
+                        );
+                      } else {
+                        setState(() {
+                          if (selectedNotes.contains(notes[index].id as int)) {
+                            selectedNotes.remove(notes[index].id as int);
+                          } else {
+                            selectedNotes.add(notes[index].id as int);
+                          }
+                        });
+                      }
                     } else {
                       setState(() {
                         if (selectedNotes.contains(notes[index].id as int)) {
@@ -117,74 +187,66 @@ class _MainScreenState extends State<MainScreen> {
                         }
                       });
                     }
-                  } else {
-                    setState(() {
-                      if (selectedNotes.contains(notes[index].id as int)) {
-                        selectedNotes.remove(notes[index].id as int);
-                      } else {
-                        selectedNotes.add(notes[index].id as int);
-                      }
-                    });
-                  }
-                },
-                child: Container(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        width: double.maxFinite,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              notes[index].title,
-                              style:
-                                  const TextStyle(fontWeight: FontWeight.bold),
-                            ),
-                            Text(
-                              DateFormat.MMMd('en_US')
-                                  .add_jm()
-                                  .format(notes[index].updatedAt as DateTime)
-                                  .toString(),
-                              style: const TextStyle(
-                                color: Colors.black,
-                                fontWeight: FontWeight.w300,
-                                fontSize: 10,
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(10),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                notes[index].title,
+                                style: const TextStyle(
+                                    fontWeight: FontWeight.bold),
                               ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(
-                        height: 10,
-                      ),
-                      SizedBox(
-                        width: double.maxFinite,
-                        child: Text(
-                          notes[index].description,
-                          maxLines: 7,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontStyle: FontStyle.italic,
-                            color: Color.fromARGB(255, 71, 70, 70),
+                              Text(
+                                DateFormat.MMMd('en_US')
+                                    .add_jm()
+                                    .format(notes[index].updatedAt as DateTime)
+                                    .toString(),
+                                style: const TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w300,
+                                  fontSize: 10,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        SizedBox(
+                          width: double.maxFinite,
+                          child: Text(
+                            notes[index].description,
+                            maxLines: 7,
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontStyle: FontStyle.italic,
+                              color: Color.fromARGB(255, 71, 70, 70),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            );
-          }),
-        ),
-      );
-    } else {
-      return const Center(
-        child: Text(
-          'No Notes',
-          style: TextStyle(fontSize: 24),
-        ),
-      );
+              );
+            }),
+          ),
+        );
+      } else {
+        return const Center(
+          child: Text(
+            'No Notes',
+            style: TextStyle(fontSize: 24),
+          ),
+        );
+      }
     }
   }
 
