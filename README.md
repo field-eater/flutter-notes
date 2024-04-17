@@ -1,4 +1,4 @@
-# notes_app
+# PHNotes
 
 A new Flutter project.
 

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:notes_app/screens/main_screen.dart';
+import 'package:PHNotes/screens/main_screen.dart';
 
 class Notes extends StatelessWidget {
   const Notes({super.key});

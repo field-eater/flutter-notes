@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:notes_app/models/note_model.dart';
+import 'package:PHNotes/models/note_model.dart';
 
 class NoteTextfield extends StatefulWidget {
   const NoteTextfield({

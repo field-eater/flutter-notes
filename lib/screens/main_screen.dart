@@ -5,10 +5,10 @@ import 'package:flutter/widgets.dart';
 
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:intl/intl.dart';
-import 'package:notes_app/controllers/note_controller.dart';
-import 'package:notes_app/models/note_model.dart';
-import 'package:notes_app/screens/create_note_screen.dart';
-import 'package:notes_app/screens/view_note_screen.dart';
+import 'package:PHNotes/controllers/note_controller.dart';
+import 'package:PHNotes/models/note_model.dart';
+import 'package:PHNotes/screens/create_note_screen.dart';
+import 'package:PHNotes/screens/view_note_screen.dart';
 
 import 'package:provider/provider.dart';
 import 'package:skeletonizer/skeletonizer.dart';
@@ -296,7 +296,7 @@ class _MainScreenState extends State<MainScreen> {
         }
       }
       return const Text(
-        'Notes',
+        'PHNotes',
         style: TextStyle(color: Colors.white),
       );
     });

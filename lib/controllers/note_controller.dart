@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:notes_app/models/note_model.dart';
-import 'package:notes_app/screens/main_screen.dart';
-import 'package:notes_app/services/notes_service.dart';
+import 'package:PHNotes/models/note_model.dart';
+import 'package:PHNotes/screens/main_screen.dart';
+import 'package:PHNotes/services/notes_service.dart';
 import 'package:sqflite/sqflite.dart';
 
 class NotesController extends ChangeNotifier {
@@ -130,11 +130,11 @@ class NotesController extends ChangeNotifier {
 
   Future<void> deleteNotes(List<int> ids) async {
     final db = await database();
-    for (int id in ids) {
-      await db.delete('notes',
-          where: 'id IN (${List.filled(ids.length, '?').join(',')})',
-          whereArgs: ids);
-    }
+
+    await db.delete('notes',
+        where: 'id IN (${List.filled(ids.length, '?').join(',')})',
+        whereArgs: ids);
+
     notifyListeners();
   }
 

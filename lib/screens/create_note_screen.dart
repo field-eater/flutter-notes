@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
-import 'package:notes_app/controllers/note_controller.dart';
+import 'package:PHNotes/controllers/note_controller.dart';
 
-import 'package:notes_app/models/note_model.dart';
+import 'package:PHNotes/models/note_model.dart';
 
-import 'package:notes_app/widgets/note_textfield.dart';
+import 'package:PHNotes/widgets/note_textfield.dart';
 import 'package:provider/provider.dart';
 
 class CreateNoteScreen extends StatefulWidget {
