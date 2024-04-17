@@ -238,7 +238,7 @@ class _MainScreenState extends State<MainScreen> {
         icon: Icon(Icons.close),
         onPressed: () {
           setState(() {
-            selectedNotes = [];
+            selectedNotes.clear();
             hasSelect = false;
           });
         },
@@ -258,11 +258,11 @@ class _MainScreenState extends State<MainScreen> {
 
               if (ids.every((id) => selectedNotes.contains(id))) {
                 setState(() {
-                  selectedNotes = [];
+                  selectedNotes.clear();
                 });
               } else {
                 setState(() {
-                  selectedNotes = [];
+                  selectedNotes.clear();
                   selectedNotes.addAll(ids);
                 });
               }
@@ -282,7 +282,7 @@ class _MainScreenState extends State<MainScreen> {
                                 onPressed: () {
                                   Navigator.of(context).pop();
                                   setState(() {
-                                    selectedNotes = [];
+                                    selectedNotes.clear();
                                   });
                                 },
                                 child: Text("No"),
@@ -312,7 +312,7 @@ class _MainScreenState extends State<MainScreen> {
                                   );
 
                                   setState(() {
-                                    selectedNotes = [];
+                                    selectedNotes.clear();
                                   });
 
                                   Provider.of<NotesController>(context,
