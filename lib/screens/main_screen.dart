@@ -29,6 +29,7 @@ class _MainScreenState extends State<MainScreen> {
     // TODO: implement initState
     super.initState();
     _init();
+    _notes();
   }
 
   @override
@@ -36,9 +37,14 @@ class _MainScreenState extends State<MainScreen> {
     super.dispose();
   }
 
-  _init() async {
+  _init() {
     selectedNotes =
         Provider.of<NotesController>(context, listen: false).selectedNotes;
+
+    controller = context.read<NotesController>().formController;
+  }
+
+  _notes() async {
     await Provider.of<NotesController>(context, listen: false)
         .getNotes()
         .then((value) {
@@ -47,9 +53,11 @@ class _MainScreenState extends State<MainScreen> {
         notes.sort((b, a) {
           return a.updatedAt!.compareTo(b.updatedAt!);
         });
+        if (notes.isEmpty) {
+          hasSelect = false;
+        }
       });
     });
-    controller = context.read<NotesController>().formController;
   }
 
   @override
@@ -315,22 +323,7 @@ class _MainScreenState extends State<MainScreen> {
                                     selectedNotes.clear();
                                   });
 
-                                  Provider.of<NotesController>(context,
-                                          listen: false)
-                                      .getNotes()
-                                      .then((value) {
-                                    setState(() {
-                                      notes = value;
-                                      notes.sort((a, b) {
-                                        var prevNote = a.updatedAt;
-                                        var nextNote = b.updatedAt;
-                                        return prevNote!.compareTo(nextNote!);
-                                      });
-                                      if (notes.isEmpty) {
-                                        hasSelect = false;
-                                      }
-                                    });
-                                  });
+                                  _notes();
 
                                   Navigator.of(context).pop();
                                 },
