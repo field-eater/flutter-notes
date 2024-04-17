@@ -77,7 +77,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
                     Icon(
-                      Icons.save,
+                      Icons.save_alt,
                       color: Colors.deepPurple,
                     ),
                     Text('Save'),

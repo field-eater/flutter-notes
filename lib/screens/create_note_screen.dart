@@ -84,7 +84,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 if (description.isNotEmpty) {
                   notesController.insertNote(note);
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
+                    const SnackBar(
                       content: const Text('Note saved successfully'),
                     ),
                   );
@@ -107,7 +107,7 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                   );
                 }
               },
-              icon: const Icon(Icons.save),
+              icon: const Icon(Icons.check),
               color: Colors.white,
             ),
           ],

@@ -6,7 +6,9 @@ import 'package:notes_app/controllers/note_controller.dart';
 import 'package:notes_app/models/note_model.dart';
 import 'package:notes_app/screens/create_note_screen.dart';
 import 'package:notes_app/screens/view_note_screen.dart';
+
 import 'package:provider/provider.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -16,9 +18,9 @@ class MainScreen extends StatefulWidget {
 }
 
 class _MainScreenState extends State<MainScreen> {
-  late Future<List<Note>> futureNotes;
+  List<Note> notes = [];
   late List<int> selectedNotes;
-  final FocusNode _focusNode = FocusNode();
+  bool hasSelect = false;
 
   late TextEditingController controller;
 
@@ -31,18 +33,22 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void dispose() {
-    _focusNode.dispose();
     super.dispose();
   }
 
-  _init() {
+  _init() async {
     selectedNotes =
         Provider.of<NotesController>(context, listen: false).selectedNotes;
-    futureNotes =
-        Provider.of<NotesController>(context, listen: false).getNotes();
-
-    // streamedNotes = Provider.of<NotesController>(context, listen: false)
-    //     .streamFromFutures(futureNotes);
+    await Provider.of<NotesController>(context, listen: false)
+        .getNotes()
+        .then((value) {
+      setState(() {
+        notes = value;
+        notes.sort((b, a) {
+          return a.updatedAt!.compareTo(b.updatedAt!);
+        });
+      });
+    });
     controller = context.read<NotesController>().formController;
   }
 
@@ -54,133 +60,128 @@ class _MainScreenState extends State<MainScreen> {
         actions: scaffoldActions(),
         leading: scaffoldLeading(),
         title: scaffoldTitle(),
-        // actions: [IconButton(onPressed: () {}, icon: Icon(Icons.menu))],
       ),
       body: Padding(
         padding: const EdgeInsets.all(12),
-        child: FutureProvider<List<Note>>(
-          initialData: [],
-          create: (context) => futureNotes,
-          child: Consumer<List<Note>>(
-            builder: (context, notes, child) {
-              if (notes.isNotEmpty) {
-                return SingleChildScrollView(
-                  child: StaggeredGrid.count(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 3,
-                      crossAxisSpacing: 3,
-                      children: List.generate(notes.length, (index) {
-                        return GridTile(
-                          child: Card(
-                            color: (selectedNotes.contains(notes[index].id))
-                                ? const Color.fromARGB(255, 167, 145, 229)
-                                : null,
-                            child: InkWell(
-                              focusNode: _focusNode,
-                              onLongPress: () {
-                                setState(() {
-                                  if (selectedNotes
-                                      .contains(notes[index].id as int)) {
-                                    selectedNotes
-                                        .remove(notes[index].id as int);
-                                  } else {
-                                    selectedNotes.add(notes[index].id as int);
-                                  }
-                                });
-                              },
-                              onTap: () {
-                                if (selectedNotes.isEmpty) {
-                                  Navigator.of(context).push(
-                                    MaterialPageRoute(
-                                      builder: ((context) => ViewNoteScreen(
-                                            note: notes[index],
-                                          )),
-                                    ),
-                                  );
-                                } else {
-                                  setState(() {
-                                    if (selectedNotes
-                                        .contains(notes[index].id as int)) {
-                                      selectedNotes
-                                          .remove(notes[index].id as int);
-                                    } else {
-                                      selectedNotes.add(notes[index].id as int);
-                                    }
-                                  });
-                                }
-                              },
-                              child: Container(
-                                padding: const EdgeInsets.all(10),
-                                child: Column(
-                                  children: [
-                                    SizedBox(
-                                      width: double.maxFinite,
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            notes[index].title,
-                                            style: const TextStyle(
-                                                fontWeight: FontWeight.bold),
-                                          ),
-                                          Text(
-                                            DateFormat.yMMMMd('en_US')
-                                                .format(notes[index].updatedAt
-                                                    as DateTime)
-                                                .toString(),
-                                            style: const TextStyle(
-                                              color: Colors.black,
-                                              fontWeight: FontWeight.w300,
-                                              fontSize: 10,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      height: 10,
-                                    ),
-                                    SizedBox(
-                                      width: double.maxFinite,
-                                      child: Text(
-                                        notes[index].description,
-                                        maxLines: 7,
-                                        style: const TextStyle(
-                                          fontSize: 12,
-                                          fontStyle: FontStyle.italic,
-                                          color:
-                                              Color.fromARGB(255, 71, 70, 70),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      })),
-                );
-              }
-              return const Center(
-                child: Text(
-                  'No notes',
-                  style: TextStyle(
-                    fontSize: 24,
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
+        child: gridNotes(),
       ),
       floatingActionButton: scaffoldFloatingActionButton(),
     );
   }
 
+  Widget? gridNotes() {
+    if (notes.isNotEmpty) {
+      return SingleChildScrollView(
+        child: StaggeredGrid.count(
+          crossAxisCount: 2,
+          children: List.generate(notes.length, (index) {
+            return Card(
+              color: (selectedNotes.contains(notes[index].id))
+                  ? const Color.fromARGB(255, 167, 145, 229)
+                  : null,
+              child: InkWell(
+                onLongPress: () {
+                  setState(() {
+                    hasSelect = true;
+                    if (selectedNotes.contains(notes[index].id as int)) {
+                      selectedNotes.remove(notes[index].id as int);
+                    } else {
+                      selectedNotes.add(notes[index].id as int);
+                    }
+                  });
+                },
+                onTap: () {
+                  if (selectedNotes.isEmpty) {
+                    if (!hasSelect) {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: ((context) => ViewNoteScreen(
+                                note: notes[index],
+                              )),
+                        ),
+                      );
+                    } else {
+                      setState(() {
+                        if (selectedNotes.contains(notes[index].id as int)) {
+                          selectedNotes.remove(notes[index].id as int);
+                        } else {
+                          selectedNotes.add(notes[index].id as int);
+                        }
+                      });
+                    }
+                  } else {
+                    setState(() {
+                      if (selectedNotes.contains(notes[index].id as int)) {
+                        selectedNotes.remove(notes[index].id as int);
+                      } else {
+                        selectedNotes.add(notes[index].id as int);
+                      }
+                    });
+                  }
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              notes[index].title,
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            Text(
+                              DateFormat.MMMd('en_US')
+                                  .add_jm()
+                                  .format(notes[index].updatedAt as DateTime)
+                                  .toString(),
+                              style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.w300,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      SizedBox(
+                        width: double.maxFinite,
+                        child: Text(
+                          notes[index].description,
+                          maxLines: 7,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontStyle: FontStyle.italic,
+                            color: Color.fromARGB(255, 71, 70, 70),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ),
+      );
+    } else {
+      return const Center(
+        child: Text(
+          'No Notes',
+          style: TextStyle(fontSize: 24),
+        ),
+      );
+    }
+  }
+
   Widget? scaffoldFloatingActionButton() {
-    if (selectedNotes.isEmpty) {
+    if (!hasSelect) {
       return FloatingActionButton(
         onPressed: () {
           Navigator.of(context).push(
@@ -196,21 +197,49 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Widget? scaffoldTitle() {
-    return Text(
-      selectedNotes.length < 1
-          ? 'Notes'
-          : "${selectedNotes.length} items selected",
-      style: TextStyle(color: Colors.white),
-    );
+    return Builder(builder: (context) {
+      if (hasSelect) {
+        if (selectedNotes.length == 0) {
+          return const Text(
+            'Select items',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        } else if (selectedNotes.length == 1) {
+          return Text(
+            "${selectedNotes.length} item selected",
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        } else if (selectedNotes.length > 1) {
+          return Text(
+            "${selectedNotes.length} items selected",
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          );
+        }
+      }
+      return const Text(
+        'Notes',
+        style: TextStyle(color: Colors.white),
+      );
+    });
   }
 
   Widget? scaffoldLeading() {
-    if (selectedNotes.length > 0) {
+    if (hasSelect) {
       return IconButton(
         icon: Icon(Icons.close),
         onPressed: () {
           setState(() {
             selectedNotes = [];
+            hasSelect = false;
           });
         },
       );
@@ -219,60 +248,100 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   List<Widget>? scaffoldActions() {
-    if (selectedNotes.isNotEmpty) {
+    if (hasSelect) {
       return [
         IconButton(
             onPressed: () {
-              showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      shape: BeveledRectangleBorder(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            setState(() {
-                              selectedNotes = [];
-                            });
-                          },
-                          child: Text("No"),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            Provider.of<NotesController>(context, listen: false)
-                                .deleteNotes(selectedNotes);
+              List<int> ids = [];
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                duration: Duration(seconds: 2),
-                                content: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text('Notes deleted successfully'),
-                                  ],
-                                ),
-                              ),
-                            );
-                            setState(() {
-                              selectedNotes = [];
-                            });
-                            Navigator.of(context).pop();
-                          },
-                          child: Text("Yes"),
-                        )
-                      ],
-                      content: Text(
-                          'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
-                    );
-                  });
+              notes.forEach((e) => ids.add(e.id as int));
+
+              if (ids.every((id) => selectedNotes.contains(id))) {
+                setState(() {
+                  selectedNotes = [];
+                });
+              } else {
+                setState(() {
+                  selectedNotes = [];
+                  selectedNotes.addAll(ids);
+                });
+              }
             },
+            icon: const Icon(Icons.checklist_outlined)),
+        IconButton(
+            onPressed: (selectedNotes.isEmpty)
+                ? null
+                : () {
+                    showDialog(
+                        context: context,
+                        builder: (context) {
+                          return AlertDialog(
+                            shape: BeveledRectangleBorder(),
+                            actions: [
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                  setState(() {
+                                    selectedNotes = [];
+                                  });
+                                },
+                                child: Text("No"),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Provider.of<NotesController>(context,
+                                          listen: false)
+                                      .deleteNotes(selectedNotes);
+
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      duration: Duration(seconds: 2),
+                                      content: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.delete,
+                                            color: Colors.white,
+                                          ),
+                                          SizedBox(
+                                            width: 10,
+                                          ),
+                                          Text('Notes deleted successfully'),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+
+                                  setState(() {
+                                    selectedNotes = [];
+                                  });
+
+                                  Provider.of<NotesController>(context,
+                                          listen: false)
+                                      .getNotes()
+                                      .then((value) {
+                                    setState(() {
+                                      notes = value;
+                                      notes.sort((a, b) {
+                                        var prevNote = a.updatedAt;
+                                        var nextNote = b.updatedAt;
+                                        return prevNote!.compareTo(nextNote!);
+                                      });
+                                      if (notes.isEmpty) {
+                                        hasSelect = false;
+                                      }
+                                    });
+                                  });
+
+                                  Navigator.of(context).pop();
+                                },
+                                child: Text("Yes"),
+                              )
+                            ],
+                            content: Text(
+                                'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
+                          );
+                        });
+                  },
             icon: Icon(Icons.delete))
       ];
     }

@@ -8,14 +8,14 @@ import 'package:sqflite/sqflite.dart';
 class NotesController extends ChangeNotifier {
   TextEditingController formController = TextEditingController();
   StreamController noteStreamController = StreamController();
-  final List<Note> _notes = [];
-  List<Note> get notes => _notes;
 
-  List<int> selectedNotes = [];
+  List<int> _selectedNotes = [];
+  List<int> get selectedNotes => _selectedNotes;
 
-  void selectNote(int id) {
-    selectedNotes.add(id);
-    notifyListeners();
+  set selectedNotes(List<int> value) {
+    if (value.isNotEmpty) {
+      _selectedNotes = value;
+    }
   }
 
   Future<void> insertNote(Note note) async {
@@ -70,7 +70,7 @@ class NotesController extends ChangeNotifier {
 
     // Query the table for all the Notes.
     final List<Map<String, Object?>> noteMaps = await db.query('Notes');
-
+    notifyListeners();
     return [
       for (final {
             'id': id as int,
@@ -87,19 +87,7 @@ class NotesController extends ChangeNotifier {
           updatedAt: DateTime.parse(updatedAt),
         ),
     ];
-
-    notifyListeners();
-
-    notes;
   }
-
-  // Stream<List<Note>> streamFromFutures<T>(
-  //     Iterable<Future<List<Note>>> futures) async* {
-  //   for (final future in futures) {
-  //     var result = await future;
-  //     yield result;
-  //   }
-  // }
 
   Future<void> updateNote(Note note) async {
     // Get a reference to the database.
@@ -118,7 +106,7 @@ class NotesController extends ChangeNotifier {
   }
 
   void goToMain(BuildContext context) {
-    selectedNotes = [];
+    _selectedNotes = [];
     Navigator.push(
       context,
       MaterialPageRoute(
@@ -142,11 +130,9 @@ class NotesController extends ChangeNotifier {
   Future<void> deleteNotes(List<int> ids) async {
     final db = await database();
     for (int id in ids) {
-      await db.delete(
-        'notes',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('notes',
+          where: 'id IN (${List.filled(ids.length, '?').join(',')})',
+          whereArgs: ids);
     }
     notifyListeners();
   }
