@@ -26,7 +26,14 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   void dispose() {
     // TODO: implement dispose
     formController.dispose();
+    undoController.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
   }
 
   @override
@@ -34,6 +41,30 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
     var notesController = Provider.of<NotesController>(context);
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            var description = formController.text;
+            var title = description.split('\n');
+
+            var newNote = Note(
+              id: widget.note.id,
+              title: title[0],
+              description: description,
+              createdAt: widget.note.createdAt,
+              updatedAt: DateTime.now(),
+            );
+
+            if (description != widget.note.description) {
+              notesController.updateNote(newNote);
+
+              notesController.goToMain(context);
+            } else {
+              notesController.goToMain(context);
+            }
+            ;
+          },
+        ),
         title: Text(
           widget.note.title,
           style: const TextStyle(color: Colors.white),
@@ -70,126 +101,55 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
               );
             },
           ),
-          PopupMenuButton(itemBuilder: (context) {
-            return [
-              PopupMenuItem(
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Icon(
-                      Icons.save_alt,
-                      color: Colors.deepPurple,
-                    ),
-                    Text('Save'),
-                  ],
-                ),
-                onTap: () {
-                  var description = formController.text;
-                  var title = description.split('\n');
-
-                  var newNote = Note(
-                    id: widget.note.id,
-                    title: title[0],
-                    description: description,
-                    createdAt: widget.note.createdAt,
-                    updatedAt: DateTime.now(),
-                  );
-
-                  if (description != widget.note.description) {
-                    notesController.updateNote(newNote);
-
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Note updated successfully'),
-                      ),
-                    );
-
-                    notesController.goToMain(context);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        duration: Duration(seconds: 2),
-                        content: Row(
-                          children: [
-                            Icon(
-                              Icons.info,
-                              color: Colors.white,
-                            ),
-                            SizedBox(
-                              width: 10,
-                            ),
-                            Text('No new changes were made'),
-                          ],
+          IconButton(
+              icon: Icon(Icons.delete),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return AlertDialog(
+                      shape: BeveledRectangleBorder(),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            notesController.goToMain(context);
+                          },
+                          child: Text('No'),
                         ),
-                      ),
-                    );
-                  }
-                },
-              ),
-              PopupMenuItem(
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Icon(
-                      Icons.delete,
-                      color: Colors.deepPurple,
-                    ),
-                    Text('Delete'),
-                  ],
-                ),
-                onTap: () {
-                  showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        shape: BeveledRectangleBorder(),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: Text('No'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              Provider.of<NotesController>(context,
-                                      listen: false)
-                                  .deleteNote(widget.note.id as int);
+                        TextButton(
+                          onPressed: () {
+                            Provider.of<NotesController>(context, listen: false)
+                                .deleteNote(widget.note.id as int);
 
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  duration: Duration(seconds: 2),
-                                  content: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.delete,
-                                        color: Colors.white,
-                                      ),
-                                      SizedBox(
-                                        width: 10,
-                                      ),
-                                      Text('Note deleted successfully'),
-                                    ],
-                                  ),
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                duration: Duration(seconds: 2),
+                                content: Row(
+                                  children: [
+                                    Icon(
+                                      Icons.delete,
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(
+                                      width: 10,
+                                    ),
+                                    Text('Note deleted successfully'),
+                                  ],
                                 ),
-                              );
+                              ),
+                            );
 
-                              Provider.of<NotesController>(context,
-                                      listen: false)
-                                  .goToMain(context);
-                            },
-                            child: Text('Yes'),
-                          ),
-                        ],
-                        content: const Text(
-                            'Are you sure you want to delete this note?'),
-                      );
-                    },
-                  );
-                },
-              ),
-            ];
-          })
+                            Navigator.pop(context);
+                          },
+                          child: Text('Yes'),
+                        ),
+                      ],
+                      content: const Text(
+                          'Are you sure you want to delete this note?'),
+                    );
+                  },
+                );
+              })
         ],
       ),
       body: NoteTextfield(

@@ -119,12 +119,12 @@ class _MainScreenState extends State<MainScreen> {
                     const SizedBox(
                       height: 10,
                     ),
-                    SizedBox(
+                    const SizedBox(
                       width: double.maxFinite,
                       child: Text(
                         'Placeholder',
                         maxLines: 7,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
                           fontStyle: FontStyle.italic,
                           color: Color.fromARGB(255, 71, 70, 70),
@@ -162,13 +162,15 @@ class _MainScreenState extends State<MainScreen> {
                   onTap: () {
                     if (selectedNotes.isEmpty) {
                       if (!hasSelect) {
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: ((context) => ViewNoteScreen(
-                                  note: notes[index],
-                                )),
-                          ),
-                        );
+                        Navigator.of(context)
+                            .push(
+                              MaterialPageRoute(
+                                builder: ((context) => ViewNoteScreen(
+                                      note: notes[index],
+                                    )),
+                              ),
+                            )
+                            .then((value) => setState(() {}));
                       } else {
                         setState(() {
                           if (selectedNotes.contains(notes[index].id as int)) {
@@ -387,6 +389,7 @@ class _MainScreenState extends State<MainScreen> {
 
                                   setState(() {
                                     selectedNotes = [];
+                                    hasSelect = false;
                                     ;
                                   });
 
@@ -397,8 +400,11 @@ class _MainScreenState extends State<MainScreen> {
                                 child: Text("Yes"),
                               )
                             ],
-                            content: Text(
-                                'Are you sure you want to delete ${selectedNotes.length} note(s)?'),
+                            content: (selectedNotes.length == 1)
+                                ? Text(
+                                    'Are you sure you want to delete ${selectedNotes.length} note?')
+                                : Text(
+                                    'Are you sure you want to delete ${selectedNotes.length} notes?'),
                           );
                         });
                   },

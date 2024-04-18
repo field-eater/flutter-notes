@@ -1,3 +1,4 @@
+import 'package:PHNotes/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 
@@ -26,7 +27,15 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
   void dispose() {
     // TODO: implement dispose
     formController.dispose();
+
+    undoController.dispose();
     super.dispose();
+  }
+
+  @override
+  void deactivate() {
+    // TODO: implement deactivate
+    super.deactivate();
   }
 
   @override
@@ -83,29 +92,11 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
 
                 if (description.isNotEmpty) {
                   notesController.insertNote(note);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Note saved successfully'),
-                    ),
-                  );
 
+                  // Navigator.pop(context);
                   notesController.goToMain(context);
                 } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      showCloseIcon: true,
-                      content: Row(children: [
-                        Icon(
-                          Icons.info,
-                          color: Colors.white,
-                        ),
-                        SizedBox(
-                          width: 10,
-                        ),
-                        Text('Please enter details'),
-                      ]),
-                    ),
-                  );
+                  notesController.goToMain(context);
                 }
               },
               icon: const Icon(Icons.check),
