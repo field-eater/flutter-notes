@@ -69,6 +69,7 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Theme.of(context).primaryColor,
         automaticallyImplyLeading: false,
         actions: scaffoldActions(),
         leading: scaffoldLeading(),
@@ -98,9 +99,9 @@ class _MainScreenState extends State<MainScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          const Text(
                             'Placeholder',
-                            style: const TextStyle(fontWeight: FontWeight.bold),
+                            style: TextStyle(fontWeight: FontWeight.bold),
                           ),
                           Text(
                             DateFormat.MMMd('en_US')
@@ -146,7 +147,7 @@ class _MainScreenState extends State<MainScreen> {
             children: List.generate(notes.length, (index) {
               return Card(
                 color: (selectedNotes.contains(notes[index].id))
-                    ? const Color.fromARGB(255, 167, 145, 229)
+                    ? Theme.of(context).primaryColor
                     : null,
                 child: InkWell(
                   onLongPress: () {
@@ -210,7 +211,6 @@ class _MainScreenState extends State<MainScreen> {
                                     .format(notes[index].updatedAt as DateTime)
                                     .toString(),
                                 style: const TextStyle(
-                                  color: Colors.black,
                                   fontWeight: FontWeight.w300,
                                   fontSize: 10,
                                 ),
@@ -229,7 +229,6 @@ class _MainScreenState extends State<MainScreen> {
                             style: const TextStyle(
                               fontSize: 12,
                               fontStyle: FontStyle.italic,
-                              color: Color.fromARGB(255, 71, 70, 70),
                             ),
                           ),
                         ),
@@ -255,6 +254,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget? scaffoldFloatingActionButton() {
     if (!hasSelect) {
       return FloatingActionButton(
+        foregroundColor: Theme.of(context).cardColor,
+        backgroundColor: Theme.of(context).primaryColor,
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(
@@ -271,11 +272,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget? scaffoldTitle() {
     return Builder(builder: (context) {
       if (hasSelect) {
-        if (selectedNotes.length == 0) {
+        if (selectedNotes.isEmpty) {
           return const Text(
             'Select items',
             style: TextStyle(
-              color: Colors.white,
               fontWeight: FontWeight.bold,
             ),
           );
@@ -283,23 +283,25 @@ class _MainScreenState extends State<MainScreen> {
           return Text(
             "${selectedNotes.length} item selected",
             style: const TextStyle(
-              color: Colors.white,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           );
         } else if (selectedNotes.length > 1) {
           return Text(
             "${selectedNotes.length} items selected",
             style: const TextStyle(
-              color: Colors.white,
               fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           );
         }
       }
       return const Text(
         'PHNotes',
-        style: TextStyle(color: Colors.white),
+        style: TextStyle(
+          color: Colors.white,
+        ),
       );
     });
   }

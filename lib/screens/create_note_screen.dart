@@ -43,9 +43,10 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
     var notesController = Provider.of<NotesController>(context);
     return Scaffold(
         appBar: AppBar(
+          backgroundColor: Theme.of(context).primaryColor,
           title: const Text(
             'Add a note',
-            style: TextStyle(color: Colors.white),
+            // style: TextStyle(color: Colors.white),
           ),
           actions: [
             ValueListenableBuilder(
