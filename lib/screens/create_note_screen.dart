@@ -58,7 +58,8 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                       icon: Icon(Icons.undo),
                       style: (value.canUndo)
                           ? IconButton.styleFrom(foregroundColor: Colors.white)
-                          : IconButton.styleFrom(foregroundColor: Colors.grey),
+                          : IconButton.styleFrom(
+                              foregroundColor: Theme.of(context).disabledColor),
                       onPressed: () {
                         if (value.canUndo) {
                           undoController.undo();

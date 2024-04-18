@@ -254,8 +254,8 @@ class _MainScreenState extends State<MainScreen> {
   Widget? scaffoldFloatingActionButton() {
     if (!hasSelect) {
       return FloatingActionButton(
-        foregroundColor: Theme.of(context).cardColor,
         backgroundColor: Theme.of(context).primaryColor,
+        foregroundColor: Colors.white,
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(

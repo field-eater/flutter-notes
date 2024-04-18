@@ -15,6 +15,7 @@ class Notes extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         primaryColor: tailwindBlueLight,
+        disabledColor: Colors.grey,
 
         iconButtonTheme: const IconButtonThemeData(
             style: ButtonStyle(
@@ -37,6 +38,7 @@ class Notes extends StatelessWidget {
       darkTheme: ThemeData.dark().copyWith(
         // Dark mode theme properties
         primaryColor: tailwindBlueDark,
+        disabledColor: Colors.grey,
         iconButtonTheme: const IconButtonThemeData(
             style: ButtonStyle(
           iconColor: MaterialStatePropertyAll<Color>(Colors.white),
