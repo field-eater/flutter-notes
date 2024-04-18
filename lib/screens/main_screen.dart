@@ -369,24 +369,6 @@ class _MainScreenState extends State<MainScreen> {
                                           listen: false)
                                       .deleteNotes(selectedNotes);
 
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      duration: Duration(seconds: 2),
-                                      content: Row(
-                                        children: [
-                                          Icon(
-                                            Icons.delete,
-                                            color: Colors.white,
-                                          ),
-                                          SizedBox(
-                                            width: 10,
-                                          ),
-                                          Text('Notes deleted successfully'),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-
                                   setState(() {
                                     selectedNotes = [];
                                     hasSelect = false;
