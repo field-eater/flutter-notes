@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:PHNotes/controllers/note_controller.dart';
 import 'package:PHNotes/models/note_model.dart';
 
-import 'package:PHNotes/widgets/note_textfield.dart';
-import 'package:provider/provider.dart';
+import 'package:PHNotes/components/note_textfield.dart';
+import 'package:get/get.dart';
 
 class ViewNoteScreen extends StatefulWidget {
-  const ViewNoteScreen({super.key, required this.note});
-
-  final Note note;
+  const ViewNoteScreen({
+    super.key,
+  });
 
   @override
   _ViewNoteScreenState createState() => _ViewNoteScreenState();
@@ -21,6 +20,27 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   final UndoHistoryController undoController = UndoHistoryController();
 
   late Future<Note> prevNote;
+
+  void updateNote(Note note, NotesController notesController) {
+    var description = formController.text;
+    var title = description.split('\n');
+
+    var newNote = Note(
+      id: note.id,
+      title: title[0],
+      description: description,
+      categoryId: null,
+      createdAt: note.createdAt,
+      updatedAt: DateTime.now(),
+    );
+
+    if (description != note.description) {
+      notesController.updateNote(newNote);
+      notesController.goToMain(context);
+    } else {
+      notesController.goToMain(context);
+    }
+  }
 
   @override
   void dispose() {
@@ -38,36 +58,19 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var notesController = Provider.of<NotesController>(context);
+    final note = ModalRoute.of(context)!.settings.arguments as Note;
+    NotesController notesController = Get.put(NotesController());
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
         leading: IconButton(
           icon: Icon(Icons.arrow_back),
           onPressed: () {
-            var description = formController.text;
-            var title = description.split('\n');
-
-            var newNote = Note(
-              id: widget.note.id,
-              title: title[0],
-              description: description,
-              createdAt: widget.note.createdAt,
-              updatedAt: DateTime.now(),
-            );
-
-            if (description != widget.note.description) {
-              notesController.updateNote(newNote);
-
-              notesController.goToMain(context);
-            } else {
-              notesController.goToMain(context);
-            }
-            ;
+            updateNote(note, notesController);
           },
         ),
         title: Text(
-          widget.note.title,
+          note.title,
           style: const TextStyle(color: Colors.white),
         ),
         actions: [
@@ -113,14 +116,13 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                       actions: [
                         TextButton(
                           onPressed: () {
-                            notesController.goToMain(context);
+                            Get.back();
                           },
                           child: Text('No'),
                         ),
                         TextButton(
                           onPressed: () {
-                            Provider.of<NotesController>(context, listen: false)
-                                .deleteNote(widget.note.id as int);
+                            notesController.deleteNote(note.id as int);
 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
@@ -140,7 +142,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
                               ),
                             );
 
-                            Navigator.pop(context);
+                            Get.back();
                           },
                           child: Text('Yes'),
                         ),
@@ -155,7 +157,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
       ),
       body: NoteTextfield(
         undoController: undoController,
-        note: widget.note,
+        note: note,
         controller: formController,
         route: 'view_note',
       ),

@@ -1,4 +1,6 @@
+import 'package:PHNotes/controllers/note_controller.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:PHNotes/models/note_model.dart';
 
@@ -40,6 +42,8 @@ class _NoteTextfieldState extends State<NoteTextfield> {
 
   @override
   Widget build(BuildContext context) {
+    final NotesController notesController = Get.put(NotesController());
+    String dropdownValue = notesController.categories.first;
     if (updatedAt.isNotEmpty) {
       updatedAt = DateFormat.yMMMMd('en_US')
           .format(DateTime.parse(updatedAt))
@@ -51,8 +55,24 @@ class _NoteTextfieldState extends State<NoteTextfield> {
         child: Column(
           children: [
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("$date | ${_counterText.toString()} Characters"),
+                DropdownButton(
+                    value: dropdownValue,
+                    icon: const Icon(Icons.arrow_downward),
+                    items: notesController.categories
+                        .map<DropdownMenuItem<String>>((value) {
+                      return DropdownMenuItem<String>(
+                        value: value,
+                        child: Text(value),
+                      );
+                    }).toList(),
+                    onChanged: ((String? value) {
+                      setState(() {
+                        dropdownValue = value!;
+                      });
+                    })),
               ],
             ),
             TextField(

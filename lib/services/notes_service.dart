@@ -14,13 +14,19 @@ Future<Database> database() async {
 
     onCreate: (db, version) {
       // Run the CREATE TABLE statement on the database.
-      return db.execute(
-        'CREATE TABLE notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL, created_at DATETIME, updated_at DATETIME)',
-      );
+      return _createDb(db, version);
     },
     version: 1,
     // onUpgrade: (Database db, int ol)
   );
 
   return database;
+}
+
+void _createDb(Database db, int newVersion) async {
+  await db.execute(
+    'CREATE TABLE categories (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL); ',
+  );
+  await db.execute(
+      'CREATE TABLE notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL,  created_at DATETIME, updated_at DATETIME, category_id INTEGER,  FOREIGN KEY (category_id) REFERENCES categories(id));');
 }

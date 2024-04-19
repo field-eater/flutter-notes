@@ -1,13 +1,12 @@
 import 'package:PHNotes/screens/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 import 'package:PHNotes/controllers/note_controller.dart';
 
 import 'package:PHNotes/models/note_model.dart';
 
-import 'package:PHNotes/widgets/note_textfield.dart';
-import 'package:provider/provider.dart';
+import 'package:PHNotes/components/note_textfield.dart';
+import 'package:get/get.dart';
 
 class CreateNoteScreen extends StatefulWidget {
   CreateNoteScreen({
@@ -40,13 +39,13 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    var notesController = Provider.of<NotesController>(context);
+    NotesController notesController = Get.put(NotesController());
     return Scaffold(
         appBar: AppBar(
           backgroundColor: Theme.of(context).primaryColor,
           title: const Text(
             'Add a note',
-            // style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.white),
           ),
           actions: [
             ValueListenableBuilder(
@@ -88,12 +87,14 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
                 Note note = Note(
                   title: title[0],
                   description: description,
+                  categoryId: null,
                   createdAt: DateTime.now(),
                   updatedAt: DateTime.now(),
                 );
 
                 if (description.isNotEmpty) {
                   notesController.insertNote(note);
+                  notesController.notes.refresh();
 
                   // Navigator.pop(context);
                   notesController.goToMain(context);
