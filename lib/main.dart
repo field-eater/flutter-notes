@@ -7,6 +7,7 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 
 Future main() async {
   await database();
+
   runApp(
     const Notes(),
   );

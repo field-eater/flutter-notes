@@ -1,4 +1,7 @@
+import 'package:PHNotes/components/category_chips.dart';
+import 'package:PHNotes/controllers/category_controller.dart';
 import 'package:PHNotes/controllers/note_controller.dart';
+import 'package:PHNotes/models/category_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -11,10 +14,14 @@ class NoteTextfield extends StatefulWidget {
     required this.controller,
     required this.route,
     required this.undoController,
+    required this.dropdownController,
+    required this.categories,
   });
 
   final Note? note;
+  final List categories;
   final TextEditingController controller;
+  final TextEditingController dropdownController;
   final UndoHistoryController undoController;
   final String route;
 
@@ -38,17 +45,16 @@ class _NoteTextfieldState extends State<NoteTextfield> {
       widget.controller.text = widget.note!.description;
       _counterText = widget.note!.description.length;
     }
-  }
 
-  @override
-  Widget build(BuildContext context) {
-    final NotesController notesController = Get.put(NotesController());
-    String dropdownValue = notesController.categories.first;
     if (updatedAt.isNotEmpty) {
       updatedAt = DateFormat.yMMMMd('en_US')
           .format(DateTime.parse(updatedAt))
           .toString();
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(15),
       child: SingleChildScrollView(
@@ -58,21 +64,20 @@ class _NoteTextfieldState extends State<NoteTextfield> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text("$date | ${_counterText.toString()} Characters"),
-                DropdownButton(
-                    value: dropdownValue,
-                    icon: const Icon(Icons.arrow_downward),
-                    items: notesController.categories
-                        .map<DropdownMenuItem<String>>((value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value),
+                DropdownMenu<String>(
+                    controller: widget.dropdownController,
+                    initialSelection: (widget.route == 'view_note')
+                        ? widget.dropdownController.text =
+                            widget.note!.categoryId.toString()
+                        : null,
+                    dropdownMenuEntries: widget.categories
+                        .map<DropdownMenuEntry<String>>((value) {
+                      return DropdownMenuEntry<String>(
+                        value: value.id.toString(),
+                        label: value.title,
                       );
                     }).toList(),
-                    onChanged: ((String? value) {
-                      setState(() {
-                        dropdownValue = value!;
-                      });
-                    })),
+                    onSelected: ((String? value) {})),
               ],
             ),
             TextField(

@@ -19,14 +19,6 @@ class NotesController extends GetxController {
   final note = Note(title: '', description: '').obs;
   final hasSelect = false.obs;
 
-  List categories = [
-    "All",
-    "Personal",
-    "Work",
-    "Family",
-    "Others",
-  ].obs;
-
   Future<void> insertNote(Note note) async {
     // Get a reference to the database.
     final db = await database();

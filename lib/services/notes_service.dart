@@ -29,4 +29,22 @@ void _createDb(Database db, int newVersion) async {
   );
   await db.execute(
       'CREATE TABLE notes(id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, description TEXT NOT NULL,  created_at DATETIME, updated_at DATETIME, category_id INTEGER,  FOREIGN KEY (category_id) REFERENCES categories(id));');
+  initializeCategories();
+}
+
+void initializeCategories() async {
+  final db = await database();
+  final batch = db.batch();
+  final initialCategories = {
+    {'title': 'All'},
+    {'title': 'Personal'},
+    {'title': 'Work'},
+    {'title': 'Family'},
+    {'title': 'Others'},
+  };
+
+  for (final category in initialCategories) {
+    batch.insert('categories', category);
+  }
+  await batch.commit(noResult: true);
 }

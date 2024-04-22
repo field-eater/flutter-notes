@@ -1,3 +1,4 @@
+import 'package:PHNotes/controllers/category_controller.dart';
 import 'package:flutter/material.dart';
 
 import 'package:PHNotes/controllers/note_controller.dart';
@@ -7,9 +8,9 @@ import 'package:PHNotes/components/note_textfield.dart';
 import 'package:get/get.dart';
 
 class ViewNoteScreen extends StatefulWidget {
-  const ViewNoteScreen({
-    super.key,
-  });
+  const ViewNoteScreen({super.key, this.categories});
+
+  final List? categories;
 
   @override
   _ViewNoteScreenState createState() => _ViewNoteScreenState();
@@ -60,6 +61,10 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   Widget build(BuildContext context) {
     final note = ModalRoute.of(context)!.settings.arguments as Note;
     NotesController notesController = Get.put(NotesController());
+    CategoryController categoryController = Get.put(CategoryController());
+    final TextEditingController dropdownController = TextEditingController();
+
+    print(note.categoryId);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
@@ -160,6 +165,8 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
         note: note,
         controller: formController,
         route: 'view_note',
+        categories: categoryController.dropdownCategories,
+        dropdownController: dropdownController,
       ),
     );
   }

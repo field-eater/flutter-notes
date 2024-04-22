@@ -18,6 +18,7 @@ class _GridNotesState extends State<GridNotes> {
     return GetBuilder<NotesController>(builder: (notesController) {
       if (notesController.notes.isNotEmpty) {
         return SingleChildScrollView(
+          scrollDirection: Axis.vertical,
           child: StaggeredGrid.count(
             crossAxisCount: 2,
             children:

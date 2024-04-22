@@ -42,7 +42,7 @@ class Notes extends StatelessWidget {
           iconColor: MaterialStatePropertyAll<Color>(Colors.white),
           backgroundColor: MaterialStatePropertyAll<Color>(tailwindBlueLight),
         )),
-
+        dividerColor: tailwindBlueLight,
         // Light mode theme properties
         textTheme: const TextTheme(
           titleLarge: TextStyle(color: Colors.black87),
@@ -58,6 +58,7 @@ class Notes extends StatelessWidget {
       darkTheme: ThemeData.dark().copyWith(
         // Dark mode theme properties
         primaryColor: tailwindBlueDark,
+        dividerColor: tailwindBlueDark,
 
         disabledColor: Colors.grey,
         iconButtonTheme: const IconButtonThemeData(

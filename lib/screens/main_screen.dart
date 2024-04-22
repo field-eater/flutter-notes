@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:PHNotes/components/category_chips.dart';
+import 'package:PHNotes/controllers/category_controller.dart';
 import 'package:PHNotes/widgets/batch_delete.dart';
 import 'package:PHNotes/components/grid_notes.dart';
 import 'package:PHNotes/widgets/scaffold_leading.dart';
@@ -8,6 +9,7 @@ import 'package:PHNotes/widgets/scaffold_title.dart';
 import 'package:PHNotes/widgets/select_all.dart';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 
 import 'package:get/get.dart';
 
@@ -28,13 +30,16 @@ class _MainScreenState extends State<MainScreen> {
   // var isFetching = false.obs;
 
   late TextEditingController controller;
+
   NotesController notesController = Get.put(NotesController());
+  CategoryController categoryController = Get.put(CategoryController());
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     notesController.setNotes();
+    categoryController.setCategories();
   }
 
   @override
@@ -64,7 +69,7 @@ class _MainScreenState extends State<MainScreen> {
           padding: EdgeInsets.all(12),
           child: Column(
             children: [
-              CategoryChips(notesController: notesController),
+              CategoryChips(categoryController: categoryController),
               GridNotes(),
             ],
           ),
