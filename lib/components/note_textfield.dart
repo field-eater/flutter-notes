@@ -32,10 +32,10 @@ class NoteTextfield extends StatefulWidget {
 class _NoteTextfieldState extends State<NoteTextfield> {
   late int _counterText = 0;
   var date = DateFormat.yMMMMd('en_US').format(DateTime.now()).toString();
+  final CategoryController categoryController = Get.put(CategoryController());
 
   var updatedAt = '';
   var categoryTitle = '';
-  var categoryId = '';
 
 // to open keyboard call this function;
 
@@ -43,13 +43,12 @@ class _NoteTextfieldState extends State<NoteTextfield> {
   void initState() {
     // TODO: implement initState
     super.initState();
+    if (widget.route == 'view_note') {
+      _initNoteCategory();
+    }
     if (widget.note != null) {
       widget.controller.text = widget.note!.description;
       _counterText = widget.note!.description.length;
-    }
-
-    if (widget.route == 'view_note') {
-      _initCategoryTitle();
     }
 
     if (updatedAt.isNotEmpty) {
@@ -59,11 +58,13 @@ class _NoteTextfieldState extends State<NoteTextfield> {
     }
   }
 
-  _initCategoryTitle() async {
-    final CategoryController categoryController = Get.put(CategoryController());
-    categoryId = widget.note!.categoryId.toString();
-    var category = await categoryController.getCategory('id', categoryId);
-    categoryTitle = category.title;
+  _initNoteCategory() async {
+    final category = await categoryController.getCategory(
+        'id', widget.note!.categoryId.toString());
+
+    // if (category.id != 1) {
+    widget.dropdownController.text = category.title;
+    // }
   }
 
   @override
@@ -79,9 +80,6 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                 Text("$date | ${_counterText.toString()} Characters"),
                 DropdownMenu<String>(
                     controller: widget.dropdownController,
-                    initialSelection: (widget.route == 'view_note')
-                        ? widget.dropdownController.text = categoryId
-                        : null,
                     dropdownMenuEntries: widget.categories
                         .map<DropdownMenuEntry<String>>((value) {
                       return DropdownMenuEntry<String>(
@@ -89,14 +87,8 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                         label: value.title,
                       );
                     }).toList(),
-                    onSelected: ((String? value) {
-                      setState(() {
-                        if (value == '1') {
-                          widget.dropdownController.text = '';
-                        } else {
-                          widget.dropdownController.text = value!;
-                        }
-                      });
+                    onSelected: ((String? value) async {
+                      setState(() async {});
                     })),
               ],
             ),

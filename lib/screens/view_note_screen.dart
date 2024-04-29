@@ -30,8 +30,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
     var category =
         await categoryController.getCategory('id', note.categoryId.toString());
     CategoryModel newCategory;
-
-    if (categoryTitle != '1') {
+    if (categoryTitle != '') {
       newCategory =
           await categoryController.getCategory('title', categoryTitle);
     } else {
@@ -42,8 +41,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
       id: note.id,
       title: title[0],
       description: description,
-      categoryId:
-          (categoryTitle != category.title) ? newCategory.id : note.categoryId,
+      categoryId: (categoryTitle != category.title) ? newCategory.id : null,
       createdAt: note.createdAt,
       updatedAt: DateTime.now(),
     );
