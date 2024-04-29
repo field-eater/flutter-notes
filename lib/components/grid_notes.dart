@@ -18,7 +18,6 @@ class _GridNotesState extends State<GridNotes> {
     return GetBuilder<NotesController>(builder: (notesController) {
       if (notesController.notes.isNotEmpty) {
         return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
           child: StaggeredGrid.count(
             crossAxisCount: 2,
             children:
@@ -103,12 +102,16 @@ class _GridNotesState extends State<GridNotes> {
           ),
         );
       }
-      return Center(
-        child: Text(
-          'No notes',
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-      );
+      return LayoutBuilder(builder: ((context, constraints) {
+        return Container(
+          constraints: constraints,
+          alignment: Alignment.center,
+          child: Text(
+            'No notes',
+            style: Theme.of(context).textTheme.titleLarge,
+          ),
+        );
+      }));
     });
   }
 }

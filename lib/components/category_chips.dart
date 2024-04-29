@@ -1,6 +1,8 @@
 import 'package:PHNotes/controllers/category_controller.dart';
 import 'package:PHNotes/controllers/note_controller.dart';
+
 import 'package:PHNotes/models/category_model.dart';
+import 'package:PHNotes/models/note_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -8,8 +10,10 @@ class CategoryChips extends StatelessWidget {
   const CategoryChips({
     super.key,
     required this.categoryController,
+    required this.notesController,
   });
   final CategoryController categoryController;
+  final NotesController notesController;
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +93,9 @@ class CategoryChips extends StatelessWidget {
         onSelected: (bool selected) {
           if (selected) {
             currentCategory.value = categoryController.categories[index].title;
+            notesController.categoryId.value =
+                categoryController.categories[index].id;
+            notesController.filterNotesByCategory();
           }
         },
       );

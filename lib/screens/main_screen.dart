@@ -7,6 +7,7 @@ import 'package:PHNotes/components/grid_notes.dart';
 import 'package:PHNotes/widgets/scaffold_leading.dart';
 import 'package:PHNotes/widgets/scaffold_title.dart';
 import 'package:PHNotes/widgets/select_all.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -68,9 +69,14 @@ class _MainScreenState extends State<MainScreen> {
         body: Padding(
           padding: EdgeInsets.all(12),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              CategoryChips(categoryController: categoryController),
-              GridNotes(),
+              CategoryChips(
+                  categoryController: categoryController,
+                  notesController: notesController),
+              Expanded(
+                child: GridNotes(),
+              ),
             ],
           ),
         ),

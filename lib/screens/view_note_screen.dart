@@ -1,4 +1,5 @@
 import 'package:PHNotes/controllers/category_controller.dart';
+import 'package:PHNotes/models/category_model.dart';
 import 'package:flutter/material.dart';
 
 import 'package:PHNotes/controllers/note_controller.dart';
@@ -18,28 +19,49 @@ class ViewNoteScreen extends StatefulWidget {
 
 class _ViewNoteScreenState extends State<ViewNoteScreen> {
   TextEditingController formController = TextEditingController();
+  CategoryController categoryController = Get.put(CategoryController());
   final UndoHistoryController undoController = UndoHistoryController();
+  final TextEditingController dropdownController = TextEditingController();
 
   late Future<Note> prevNote;
 
-  void updateNote(Note note, NotesController notesController) {
+  void updateNote(Note note, NotesController notesController) async {
     var description = formController.text;
+    var categoryTitle = dropdownController.text;
     var title = description.split('\n');
+    var category =
+        await categoryController.getCategory('id', note.categoryId.toString());
+    CategoryModel newCategory;
+
+    if (categoryTitle != 1.toString()) {
+      newCategory =
+          await categoryController.getCategory('title', categoryTitle);
+    } else {
+      newCategory = await categoryController.getCategory('id', 1.toString());
+    }
 
     var newNote = Note(
       id: note.id,
       title: title[0],
       description: description,
-      categoryId: null,
+      categoryId:
+          (categoryTitle != category.title) ? newCategory.id : note.categoryId,
       createdAt: note.createdAt,
       updatedAt: DateTime.now(),
     );
 
-    if (description != note.description) {
+    if (description != note.description ||
+        categoryTitle != category.title && newCategory.id != 1) {
       notesController.updateNote(newNote);
-      notesController.goToMain(context);
-    } else {
-      notesController.goToMain(context);
+      notesController.goToMain();
+    }
+    // else if (description != note.description &&
+    //     categoryTitle != category.title &&
+    //     category.id == 1) {
+    //   notesController.goToMain();
+    // }
+    else {
+      notesController.goToMain();
     }
   }
 
@@ -62,9 +84,7 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
     final note = ModalRoute.of(context)!.settings.arguments as Note;
     NotesController notesController = Get.put(NotesController());
     CategoryController categoryController = Get.put(CategoryController());
-    final TextEditingController dropdownController = TextEditingController();
 
-    print(note.categoryId);
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,

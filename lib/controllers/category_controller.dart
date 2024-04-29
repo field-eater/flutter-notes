@@ -1,4 +1,5 @@
 import 'package:PHNotes/models/category_model.dart';
+import 'package:PHNotes/models/note_model.dart';
 import 'package:PHNotes/services/notes_service.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -40,17 +41,17 @@ class CategoryController extends GetxController {
     update();
   }
 
-  Future<CategoryModel> getCategory(String title) async {
+  Future<CategoryModel> getCategory(String query, String title) async {
     final db = await database();
     final category = await db.query(
       'categories',
       // Ensure that the Category has a matching title.
-      where: 'title = ?',
+      where: '$query = ?',
       // Pass the Category's id as a whereArg to prevent SQL injection.
       whereArgs: [title],
     );
 
-    return switch (category) {
+    return switch (category[0]) {
       {
         'id': int id,
         'title': String title,

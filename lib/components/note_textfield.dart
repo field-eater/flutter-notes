@@ -34,6 +34,8 @@ class _NoteTextfieldState extends State<NoteTextfield> {
   var date = DateFormat.yMMMMd('en_US').format(DateTime.now()).toString();
 
   var updatedAt = '';
+  var categoryTitle = '';
+  var categoryId = '';
 
 // to open keyboard call this function;
 
@@ -46,11 +48,22 @@ class _NoteTextfieldState extends State<NoteTextfield> {
       _counterText = widget.note!.description.length;
     }
 
+    if (widget.route == 'view_note') {
+      _initCategoryTitle();
+    }
+
     if (updatedAt.isNotEmpty) {
       updatedAt = DateFormat.yMMMMd('en_US')
           .format(DateTime.parse(updatedAt))
           .toString();
     }
+  }
+
+  _initCategoryTitle() async {
+    final CategoryController categoryController = Get.put(CategoryController());
+    categoryId = widget.note!.categoryId.toString();
+    var category = await categoryController.getCategory('id', categoryId);
+    categoryTitle = category.title;
   }
 
   @override
@@ -67,8 +80,7 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                 DropdownMenu<String>(
                     controller: widget.dropdownController,
                     initialSelection: (widget.route == 'view_note')
-                        ? widget.dropdownController.text =
-                            widget.note!.categoryId.toString()
+                        ? widget.dropdownController.text = categoryId
                         : null,
                     dropdownMenuEntries: widget.categories
                         .map<DropdownMenuEntry<String>>((value) {

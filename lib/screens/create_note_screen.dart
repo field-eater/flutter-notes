@@ -87,28 +87,31 @@ class _CreateNoteScreenState extends State<CreateNoteScreen> {
             onPressed: () async {
               var description = formController.text;
               var category = dropdownController.text;
-              print(category);
-              final notes = await notesController.getNote(1);
-              print(notes.id);
-              final categoryId = await categoryController.getCategory(category);
-              print('Id: ${categoryId.id}');
+
+              // final notes = await notesController.getNote(1);
+
+              if (category.isEmpty) {
+                category = 'All';
+              }
+              var categoryId =
+                  await categoryController.getCategory('title', category);
 
               var title = description.split('\n');
               Note note = Note(
                 title: title[0],
                 description: description,
-                categoryId: categoryId.id,
                 createdAt: DateTime.now(),
                 updatedAt: DateTime.now(),
+                categoryId: categoryId.id,
               );
 
               if (description.isNotEmpty) {
                 notesController.insertNote(note);
                 notesController.notes.refresh();
 
-                notesController.goToMain(context);
+                notesController.goToMain();
               } else {
-                notesController.goToMain(context);
+                notesController.goToMain();
               }
             },
             icon: const Icon(Icons.check),

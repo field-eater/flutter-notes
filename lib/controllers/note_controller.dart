@@ -16,6 +16,7 @@ class NotesController extends GetxController {
   final selectedNotes = [].obs;
 
   final notes = [].obs;
+  var categoryId = 1.obs;
   final note = Note(title: '', description: '').obs;
   final hasSelect = false.obs;
 
@@ -45,13 +46,14 @@ class NotesController extends GetxController {
       whereArgs: [id],
     );
 
-    return switch (note) {
+    return switch (note[0]) {
       {
         'id': int noteId,
         'title': String title,
         'description': String description,
         'created_at': DateTime createdAt,
         'updated_at': DateTime updatedAt,
+        'category_id': int categoryId,
       } =>
         Note(
           id: noteId,
@@ -59,6 +61,7 @@ class NotesController extends GetxController {
           description: description,
           createdAt: createdAt,
           updatedAt: updatedAt,
+          categoryId: categoryId,
         ),
       _ => throw const FormatException('Failed to load note.'),
     };
@@ -79,6 +82,7 @@ class NotesController extends GetxController {
             'description': description as String,
             'created_at': createdAt as String,
             'updated_at': updatedAt as String,
+            'category_id': categoryId as int,
           } in noteMaps)
         Note(
           id: id,
@@ -86,6 +90,7 @@ class NotesController extends GetxController {
           description: description,
           createdAt: DateTime.parse(createdAt),
           updatedAt: DateTime.parse(updatedAt),
+          categoryId: categoryId,
         ),
     ];
   }
@@ -139,7 +144,7 @@ class NotesController extends GetxController {
     );
   }
 
-  void goToMain(BuildContext context) {
+  void goToMain() {
     selectedNotes.value = [];
 
     update();
@@ -178,6 +183,23 @@ class NotesController extends GetxController {
       // notesController.selectedNotes.refresh();
     } else {
       selectedNotes.add(notes[index].id as int);
+      update();
+    }
+  }
+
+  void filterNotesByCategory() async {
+    if (categoryId.value == 1) {
+      print(notes.toList());
+      notes.value = await getNotes();
+      sortDesc();
+      update();
+    } else {
+      notes.value = await getNotes();
+      notes.value = notes
+          .where((element) => element.categoryId == categoryId.value)
+          .toList();
+      sortDesc();
+      print(notes.toList());
       update();
     }
   }
