@@ -18,7 +18,6 @@ class CategoryChips extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     TextEditingController controller = TextEditingController();
-    var currentCategory = 'All'.obs;
 
     return Obx(
       () => SingleChildScrollView(
@@ -27,7 +26,8 @@ class CategoryChips extends StatelessWidget {
         child: Wrap(
           spacing: 5.0,
           crossAxisAlignment: WrapCrossAlignment.center,
-          children: chips(context, currentCategory, controller),
+          children:
+              chips(context, categoryController.currentCategory, controller),
         ),
       ),
     );
@@ -93,8 +93,10 @@ class CategoryChips extends StatelessWidget {
         onSelected: (bool selected) {
           if (selected) {
             currentCategory.value = categoryController.categories[index].title;
+
             notesController.categoryId.value =
                 categoryController.categories[index].id;
+
             notesController.filterNotesByCategory();
           }
         },

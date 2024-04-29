@@ -71,9 +71,10 @@ class _MainScreenState extends State<MainScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CategoryChips(
-                  categoryController: categoryController,
-                  notesController: notesController),
+              if (notesController.hasSelect.isFalse)
+                CategoryChips(
+                    categoryController: categoryController,
+                    notesController: notesController),
               Expanded(
                 child: GridNotes(),
               ),

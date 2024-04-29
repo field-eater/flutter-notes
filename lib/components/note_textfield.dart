@@ -89,7 +89,15 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                         label: value.title,
                       );
                     }).toList(),
-                    onSelected: ((String? value) {})),
+                    onSelected: ((String? value) {
+                      setState(() {
+                        if (value == '1') {
+                          widget.dropdownController.text = '';
+                        } else {
+                          widget.dropdownController.text = value!;
+                        }
+                      });
+                    })),
               ],
             ),
             TextField(

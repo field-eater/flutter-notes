@@ -23,8 +23,6 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   final UndoHistoryController undoController = UndoHistoryController();
   final TextEditingController dropdownController = TextEditingController();
 
-  late Future<Note> prevNote;
-
   void updateNote(Note note, NotesController notesController) async {
     var description = formController.text;
     var categoryTitle = dropdownController.text;
@@ -33,11 +31,11 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
         await categoryController.getCategory('id', note.categoryId.toString());
     CategoryModel newCategory;
 
-    if (categoryTitle != 1.toString()) {
+    if (categoryTitle != '1') {
       newCategory =
           await categoryController.getCategory('title', categoryTitle);
     } else {
-      newCategory = await categoryController.getCategory('id', 1.toString());
+      newCategory = await categoryController.getCategory('id', '1');
     }
 
     var newNote = Note(

@@ -11,6 +11,7 @@ class CategoryController extends GetxController {
   static CategoryController get to => Get.find();
   var categories = [].obs;
   var dropdownCategories = [].obs;
+  var currentCategory = 'All'.obs;
   var category = CategoryModel(title: '').obs;
 
   void setCategories() async {
