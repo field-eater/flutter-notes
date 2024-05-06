@@ -86,13 +86,11 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                         .map<DropdownMenuEntry<String>>((value) {
                       return DropdownMenuEntry<String>(
                         value: value.id.toString(),
-                        label: value.title,
+                        label: (value.id == 1) ? '' : value.title,
                       );
                     }).toList(),
                     onSelected: ((String? value) async {
-                      setState(() async {
-                        //TODO:
-                      });
+                      setState(() {});
                     })),
               ],
             ),

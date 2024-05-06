@@ -75,7 +75,7 @@ class _MainScreenState extends State<MainScreen> {
                 CategoryChips(
                     categoryController: categoryController,
                     notesController: notesController),
-              Expanded(
+              const Expanded(
                 child: GridNotes(),
               ),
             ],

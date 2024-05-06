@@ -38,19 +38,19 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
       newCategory =
           await categoryController.getCategory('title', categoryTitle);
     } else {
-      newCategory = await categoryController.getCategory('id', '1');
+      newCategory = await categoryController.getCategory('title', 'All');
     }
 
     var newNote = Note(
       id: note.id,
       title: title[0],
       description: description,
-      categoryId: (categoryTitle != category.title) ? newCategory.id : null,
+      categoryId: newCategory.id,
       createdAt: note.createdAt,
       updatedAt: DateTime.now(),
     );
 
-    if (description != note.description ||
+    if (description != note.description && newCategory.id != 1 ||
         categoryTitle != category.title && newCategory.id != 1) {
       notesController.updateNote(newNote);
       notesController.goToMain();
