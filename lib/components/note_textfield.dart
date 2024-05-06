@@ -11,6 +11,7 @@ class NoteTextfield extends StatefulWidget {
   const NoteTextfield({
     super.key,
     this.note,
+    this.focusNode,
     required this.controller,
     required this.route,
     required this.undoController,
@@ -19,6 +20,7 @@ class NoteTextfield extends StatefulWidget {
   });
 
   final Note? note;
+  final FocusNode? focusNode;
   final List categories;
   final TextEditingController controller;
   final TextEditingController dropdownController;
@@ -88,11 +90,14 @@ class _NoteTextfieldState extends State<NoteTextfield> {
                       );
                     }).toList(),
                     onSelected: ((String? value) async {
-                      setState(() async {});
+                      setState(() async {
+                        //TODO:
+                      });
                     })),
               ],
             ),
             TextField(
+              focusNode: widget.focusNode,
               controller: widget.controller,
               undoController: widget.undoController,
               autofocus: (widget.route == 'create_note') ? true : false,

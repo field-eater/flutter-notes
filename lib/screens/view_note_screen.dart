@@ -1,5 +1,6 @@
 import 'package:PHNotes/controllers/category_controller.dart';
 import 'package:PHNotes/models/category_model.dart';
+
 import 'package:flutter/material.dart';
 
 import 'package:PHNotes/controllers/note_controller.dart';
@@ -22,6 +23,9 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   CategoryController categoryController = Get.put(CategoryController());
   final UndoHistoryController undoController = UndoHistoryController();
   final TextEditingController dropdownController = TextEditingController();
+  final FocusNode focusNode = FocusNode();
+  TextEditingValue currentCategory = TextEditingValue();
+  bool isFocused = false;
 
   void updateNote(Note note, NotesController notesController) async {
     var description = formController.text;
@@ -62,122 +66,153 @@ class _ViewNoteScreenState extends State<ViewNoteScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    focusNode.addListener(() {
+      if (focusNode.hasFocus) {
+        setState(() {
+          isFocused = true;
+        });
+      } else {
+        setState(() {
+          isFocused = false;
+        });
+      }
+    });
+    setState(() {
+      currentCategory = dropdownController.value;
+    });
+  }
+
+  @override
   void dispose() {
     // TODO: implement dispose
     formController.dispose();
     undoController.dispose();
+    focusNode.removeListener(() {});
+    focusNode.dispose();
     super.dispose();
-  }
-
-  @override
-  void deactivate() {
-    // TODO: implement deactivate
-    super.deactivate();
   }
 
   @override
   Widget build(BuildContext context) {
     final note = ModalRoute.of(context)!.settings.arguments as Note;
     NotesController notesController = Get.put(NotesController());
-    CategoryController categoryController = Get.put(CategoryController());
 
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).primaryColor,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            updateNote(note, notesController);
-          },
-        ),
         title: Text(
           note.title,
           style: const TextStyle(color: Colors.white),
         ),
         actions: [
-          ValueListenableBuilder(
-            valueListenable: undoController,
-            builder: (context, value, child) {
-              return Row(
+          Visibility(
+              visible: isFocused,
+              replacement: Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.undo),
-                    style: (value.canUndo)
-                        ? IconButton.styleFrom(foregroundColor: Colors.white)
-                        : IconButton.styleFrom(foregroundColor: Colors.grey),
-                    onPressed: () {
-                      if (value.canUndo) {
-                        undoController.undo();
-                      }
+                      icon: Icon(Icons.delete),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (context) {
+                            return AlertDialog(
+                              shape: BeveledRectangleBorder(),
+                              actions: [
+                                TextButton(
+                                  onPressed: () {
+                                    Get.back();
+                                  },
+                                  child: Text('No'),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    notesController.deleteNote(note.id as int);
+
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        duration: Duration(seconds: 2),
+                                        content: Row(
+                                          children: [
+                                            Icon(
+                                              Icons.delete,
+                                              color: Colors.white,
+                                            ),
+                                            SizedBox(
+                                              width: 10,
+                                            ),
+                                            Text('Note deleted successfully'),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+
+                                    Get.back();
+                                  },
+                                  child: Text('Yes'),
+                                ),
+                              ],
+                              content: const Text(
+                                  'Are you sure you want to delete this note?'),
+                            );
+                          },
+                        );
+                      }),
+                  IconButton(
+                    icon: Icon(Icons.save_alt),
+                    onPressed: () => updateNote(note, notesController),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: undoController,
+                    builder: (context, value, child) {
+                      return Row(
+                        children: [
+                          IconButton(
+                            icon: Icon(Icons.undo),
+                            style: (value.canUndo)
+                                ? IconButton.styleFrom(
+                                    foregroundColor: Colors.white)
+                                : IconButton.styleFrom(
+                                    foregroundColor: Colors.grey),
+                            onPressed: () {
+                              if (value.canUndo) {
+                                undoController.undo();
+                              }
+                            },
+                          ),
+                          IconButton(
+                            icon: Icon(Icons.redo),
+                            style: (value.canRedo)
+                                ? IconButton.styleFrom(
+                                    foregroundColor: Colors.white)
+                                : IconButton.styleFrom(
+                                    foregroundColor: Colors.grey),
+                            onPressed: () {
+                              if (value.canRedo) {
+                                undoController.redo();
+                              }
+                            },
+                          ),
+                        ],
+                      );
                     },
                   ),
                   IconButton(
-                    icon: Icon(Icons.redo),
-                    style: (value.canRedo)
-                        ? IconButton.styleFrom(foregroundColor: Colors.white)
-                        : IconButton.styleFrom(foregroundColor: Colors.grey),
-                    onPressed: () {
-                      if (value.canRedo) {
-                        undoController.redo();
-                      }
-                    },
+                    icon: Icon(Icons.save_alt),
+                    onPressed: () => updateNote(note, notesController),
                   ),
                 ],
-              );
-            },
-          ),
-          IconButton(
-              icon: Icon(Icons.delete),
-              onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (context) {
-                    return AlertDialog(
-                      shape: BeveledRectangleBorder(),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Get.back();
-                          },
-                          child: Text('No'),
-                        ),
-                        TextButton(
-                          onPressed: () {
-                            notesController.deleteNote(note.id as int);
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                duration: Duration(seconds: 2),
-                                content: Row(
-                                  children: [
-                                    Icon(
-                                      Icons.delete,
-                                      color: Colors.white,
-                                    ),
-                                    SizedBox(
-                                      width: 10,
-                                    ),
-                                    Text('Note deleted successfully'),
-                                  ],
-                                ),
-                              ),
-                            );
-
-                            Get.back();
-                          },
-                          child: Text('Yes'),
-                        ),
-                      ],
-                      content: const Text(
-                          'Are you sure you want to delete this note?'),
-                    );
-                  },
-                );
-              })
+              ))
         ],
       ),
       body: NoteTextfield(
         undoController: undoController,
+        focusNode: focusNode,
         note: note,
         controller: formController,
         route: 'view_note',

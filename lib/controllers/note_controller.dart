@@ -189,7 +189,7 @@ class NotesController extends GetxController {
 
   void filterNotesByCategory() async {
     if (categoryId.value == 1) {
-      print(notes.toList());
+  
       notes.value = await getNotes();
       sortDesc();
       update();
@@ -199,7 +199,7 @@ class NotesController extends GetxController {
           .where((element) => element.categoryId == categoryId.value)
           .toList();
       sortDesc();
-      print(notes.toList());
+
       update();
     }
   }
